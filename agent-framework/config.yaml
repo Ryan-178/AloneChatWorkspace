@@ -1,0 +1,62 @@
+# Agent Framework Configuration
+# 生产级Agent网关系统配置文件
+
+# 全局配置
+debug: false
+data_dir: ./data
+
+# LLM配置
+llm:
+  provider: openai
+  model: gpt-4o
+  api_key: null  # 从环境变量读取
+  api_base: null
+  temperature: 0.7
+  max_tokens: 4096
+  timeout: 30.0
+  max_retries: 3
+  retry_delay: 1.0
+
+# 内存配置
+memory:
+  window_size: 10
+  vector_db_type: chromadb
+  vector_db_path: ./data/chroma
+  embedding_model: text-embedding-ada-002
+  enable_persistence: true
+
+# Gateway配置
+gateway:
+  host: 0.0.0.0
+  port: 8787
+  session_timeout: 3600
+  max_sessions: 1000
+  enable_cors: true
+  cors_origins:
+    - "*"
+  enable_health_check: true
+  health_check_path: /health
+
+# 日志配置
+logging:
+  level: INFO
+  format: colored  # colored or json
+  file_path: null  # null表示只输出到控制台
+  max_file_size: 10485760  # 10MB
+  backup_count: 5
+
+# 指标配置
+metrics:
+  enabled: true
+  export_interval: 60
+  export_path: null
+  enable_prometheus: false
+  prometheus_port: 9090
+
+# 追踪配置
+tracing:
+  enabled: true
+  sample_rate: 1.0
+  export_path: null
+  enable_zipkin: false
+  zipkin_endpoint: null
