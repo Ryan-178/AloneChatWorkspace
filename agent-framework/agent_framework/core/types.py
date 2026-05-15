@@ -38,3 +38,41 @@ class ToolCall(BaseModel):
 class ToolResult(BaseModel):
     success: bool = Field(default=True)
     data: Any = Field(default=None)
+
+
+class AgentMode(str, Enum):
+    MTC = "mtc"
+    CODE = "code"
+
+
+class ModeConfig(BaseModel):
+    allowed_tools: List[str] = Field(default_factory=list, description="List of allowed tool names for this mode")
+    sandbox_config: Optional[Dict[str, Any]] = Field(default=None, description="Sandbox configuration for code execution")
+    system_prompt: Optional[str] = Field(default=None, description="System prompt for this mode")
+
+
+class FilePermission(str, Enum):
+    READ = "read"
+    WRITE = "write"
+    EXECUTE = "execute"
+
+
+class ExecutionEnvironment(str, Enum):
+    SANDBOX = "sandbox"
+    HOST = "host"
+    DOCKER = "docker"
+
+
+class TaskStatus(str, Enum):
+    PENDING = "pending"
+    IN_PROGRESS = "in_progress"
+    COMPLETED = "completed"
+    FAILED = "failed"
+    CANCELLED = "cancelled"
+
+
+class TaskPriority(str, Enum):
+    LOW = "low"
+    MEDIUM = "medium"
+    HIGH = "high"
+    CRITICAL = "critical"

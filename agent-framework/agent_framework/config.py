@@ -76,6 +76,47 @@ class TracingSettings(BaseModel):
     zipkin_endpoint: Optional[str] = Field(default=None, description="Zipkin端点")
 
 
+class MTCSettings(BaseModel):
+    """MTC模式配置 - More Than Coding模式，面向非开发用户"""
+    sandbox_root: str = Field(default="./workspace/mtc", description="MTC模式沙箱根目录")
+    allowed_file_extensions: List[str] = Field(
+        default_factory=lambda: [".txt", ".md", ".pdf", ".docx", ".xlsx", ".pptx", ".csv", ".json", ".html"],
+        description="允许处理的文件扩展名"
+    )
+    max_file_size: int = Field(default=10485760, description="最大文件大小(字节)，默认10MB")
+    intent_clarification_enabled: bool = Field(default=True, description="是否启用意图澄清")
+    max_clarification_questions: int = Field(default=3, ge=1, le=5, description="最大追问问题数")
+    allowed_commands: List[str] = Field(default_factory=list, description="允许执行的命令白名单")
+    output_formats: List[str] = Field(
+        default_factory=lambda: ["markdown", "pdf", "pptx", "xlsx", "docx"],
+        description="支持的输出格式"
+    )
+
+
+class CODESettings(BaseModel):
+    """CODE模式配置 - 面向开发者用户"""
+    sandbox_root: str = Field(default="./workspace/code", description="CODE模式沙箱根目录")
+    allowed_commands: List[str] = Field(
+        default_factory=lambda: ["git", "npm", "yarn", "pip", "pip3", "node", "npx", "python", "python3", "make", "docker"],
+        description="允许执行的命令白名单"
+    )
+    enable_linting: bool = Field(default=True, description="是否启用代码检查")
+    enable_testing: bool = Field(default=True, description="是否启用测试生成")
+    enable_browser_automation: bool = Field(default=False, description="是否启用浏览器自动化")
+    max_file_size: int = Field(default=52428800, description="最大文件大小(字节)，默认50MB")
+    enable_search_agent: bool = Field(default=True, description="是否启用Search子Agent")
+    enable_plan_mode: bool = Field(default=True, description="是否启用Plan Mode")
+    max_context_tokens: int = Field(default=128000, description="最大上下文token数")
+
+
+class ModeSettings(BaseModel):
+    """模式管理配置"""
+    default_mode: str = Field(default="MTC", description="默认模式")
+    allow_mode_switch: bool = Field(default=True, description="是否允许模式切换")
+    mtc_config: MTCSettings = Field(default_factory=MTCSettings, description="MTC模式配置")
+    code_config: CODESettings = Field(default_factory=CODESettings, description="CODE模式配置")
+
+
 class AgentConfig(BaseSettings):
     """主配置类"""
     model_config = SettingsConfigDict(
@@ -92,6 +133,7 @@ class AgentConfig(BaseSettings):
     logging: LoggingSettings = Field(default_factory=LoggingSettings)
     metrics: MetricsSettings = Field(default_factory=MetricsSettings)
     tracing: TracingSettings = Field(default_factory=TracingSettings)
+    mode: ModeSettings = Field(default_factory=ModeSettings, description="模式管理配置")
     
     # 全局配置
     debug: bool = Field(default=False, description="调试模式")
