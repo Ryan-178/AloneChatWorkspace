@@ -1,0 +1,95 @@
+models:
+  deepseek:
+    v4_flash:
+      model_id: "deepseek-chat"
+      description: "V4 Flash - 快速响应"
+      api_base: "https://api.deepseek.com/v1"
+      pricing:
+        prompt: 0.0002
+        completion: 0.0008
+      context_window: 1000000
+      default_params:
+        temperature: 0.7
+        max_tokens: 8192
+        top_p: 0.9
+        timeout: 120
+        max_retries: 3
+        retry_delay: 1.0
+        streaming: true
+
+    v4_pro:
+      model_id: "deepseek-pro"
+      description: "V4 Pro - 高质量推理"
+      api_base: "https://api.deepseek.com/v1"
+      pricing:
+        prompt: 0.001
+        completion: 0.004
+      context_window: 1000000
+      default_params:
+        temperature: 0.7
+        max_tokens: 8192
+        top_p: 0.9
+        timeout: 120
+        max_retries: 3
+        retry_delay: 1.0
+        streaming: true
+
+    v4_reasoner:
+      model_id: "deepseek-reasoner"
+      description: "V4 Reasoner - 推理增强"
+      api_base: "https://api.deepseek.com/v1"
+      pricing:
+        prompt: 0.002
+        completion: 0.008
+      context_window: 1000000
+      default_params:
+        temperature: 0.7
+        max_tokens: 8192
+        top_p: 0.9
+        timeout: 120
+        max_retries: 3
+        retry_delay: 1.0
+        streaming: true
+
+  openai:
+    gpt4o:
+      model_id: "gpt-4o"
+      description: "GPT-4o - OpenAI最新多模态模型"
+      api_base: "https://api.openai.com/v1"
+      pricing:
+        prompt: 0.005
+        completion: 0.015
+      context_window: 128000
+      default_params:
+        temperature: 0.7
+        max_tokens: 4096
+        timeout: 30
+        max_retries: 3
+
+    gpt4_turbo:
+      model_id: "gpt-4-turbo"
+      description: "GPT-4 Turbo"
+      api_base: "https://api.openai.com/v1"
+      pricing:
+        prompt: 0.01
+        completion: 0.03
+      context_window: 128000
+      default_params:
+        temperature: 0.7
+        max_tokens: 4096
+        timeout: 30
+        max_retries: 3
+
+  embedding:
+    text_embedding_ada_002:
+      model_id: "text-embedding-ada-002"
+      description: "OpenAI文本嵌入模型"
+      api_base: "https://api.openai.com/v1"
+      dimensions: 1536
+      pricing:
+        per_token: 0.0001
+
+kv_cache:
+  hit_price_per_million: 0.1
+  miss_price_per_million: 1.0
+  description: "DeepSeek KV Cache定价"
