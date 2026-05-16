@@ -1,12 +1,12 @@
 import { Moon, Sun, Monitor } from 'lucide-react'
 import { useUIStore } from '@/stores/ui-store'
-import { Button } from '@/components/ui/button'
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
+import { cn } from '@/lib/utils'
 
 const themes = [
   { value: 'light', label: '浅色', icon: Sun },
@@ -38,11 +38,15 @@ export function ThemeToggle() {
 
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger>
-        <Button variant="ghost" size="icon" className="h-9 w-9">
-          <CurrentIcon className="h-4 w-4" />
-          <span className="sr-only">切换主题</span>
-        </Button>
+      <DropdownMenuTrigger
+        className={cn(
+          'inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors',
+          'hover:bg-accent hover:text-accent-foreground',
+          'h-9 w-9 shrink-0 cursor-pointer'
+        )}
+      >
+        <CurrentIcon className="h-4 w-4" />
+        <span className="sr-only">切换主题</span>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
         {themes.map(({ value, label, icon: Icon }) => (

@@ -112,7 +112,7 @@ export function Sidebar() {
           </div>
         )}
 
-        {!sidebarCollapsed && user && (
+        {!sidebarCollapsed && user?.username && (
           <div className="flex items-center gap-3 px-3 py-2">
             <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-primary-foreground text-sm font-medium">
               {user.username.charAt(0).toUpperCase()}

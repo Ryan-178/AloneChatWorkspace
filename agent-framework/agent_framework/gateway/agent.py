@@ -11,7 +11,10 @@ from pydantic import BaseModel, Field
 from agent_framework.core.base_llm import BaseLLM, Message, Chunk, LLMConfig
 from agent_framework.llm.litellm_provider import LiteLLMProvider
 from agent_framework.core.base_tool import ToolResult
-from .tools import ToolRegistry, get_tool_registry
+from .tools import ToolExecutor
+
+ToolRegistry = ToolExecutor
+get_tool_registry = lambda: ToolExecutor()
 
 
 class AgentState(str, Enum):

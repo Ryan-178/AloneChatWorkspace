@@ -15,6 +15,7 @@ import {
 import { ThemeToggle } from '@/components/common/theme-toggle'
 import { useAuthStore } from '@/stores/auth-store'
 import { useUIStore } from '@/stores/ui-store'
+import { cn } from '@/lib/utils'
 
 interface HeaderProps {
   onMenuClick?: () => void
@@ -65,15 +66,19 @@ export function Header({ onMenuClick }: HeaderProps) {
         <ThemeToggle />
 
         <DropdownMenu>
-          <DropdownMenuTrigger>
-            <Button variant="ghost" className="relative h-9 w-9 rounded-full">
-              <Avatar className="h-9 w-9">
-                <AvatarImage src={user?.avatar_url} alt={user?.username} />
-                <AvatarFallback>
-                  {user?.username?.charAt(0).toUpperCase() || 'U'}
-                </AvatarFallback>
-              </Avatar>
-            </Button>
+          <DropdownMenuTrigger
+            className={cn(
+              'inline-flex items-center justify-center rounded-full',
+              'hover:bg-accent hover:text-accent-foreground',
+              'h-9 w-9 shrink-0 cursor-pointer'
+            )}
+          >
+            <Avatar className="h-9 w-9">
+              <AvatarImage src={user?.avatar_url} alt={user?.username} />
+              <AvatarFallback>
+                {user?.username?.charAt(0).toUpperCase() || 'U'}
+              </AvatarFallback>
+            </Avatar>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-56">
             <DropdownMenuLabel>

@@ -1,10 +1,12 @@
 """
 REST API - 模式管理、任务管理、Skills管理
+集成用户端API：认证、会话管理
 """
 from typing import Any, Dict, List, Optional
 from datetime import datetime
 from fastapi import FastAPI, HTTPException, Depends, Query
 from fastapi.responses import JSONResponse
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 
 from agent_framework.core.types import AgentMode, TaskStatus
@@ -13,9 +15,22 @@ from agent_framework.agent.mtc_agent import MTCAgent
 from agent_framework.agent.code_agent import CodeAgent
 from agent_framework.tools.skills_registry import SkillsRegistry, register_builtin_skills
 from agent_framework.tools.skills_marketplace import SkillsMarketplace
+from agent_framework.gateway.session import SessionManager
+from agent_framework.gateway.user_api import create_user_api
 
 
 app = FastAPI(title="MTC/CODE Mode API", version="1.0.0")
+
+session_manager = SessionManager()
+create_user_api(app, session_manager)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 
 class ModeSwitchRequest(BaseModel):

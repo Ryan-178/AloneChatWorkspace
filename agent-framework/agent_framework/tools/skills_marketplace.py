@@ -5,6 +5,7 @@ Skills市场接口 - Skills Marketplace
 from typing import Any, Dict, List, Optional
 from datetime import datetime
 from pathlib import Path
+from pydantic import BaseModel
 
 from agent_framework.tools.skills_registry import SkillsRegistry, SkillMetadata
 
@@ -202,6 +203,3 @@ class SkillsMarketplace:
             "rated_skills": len(self._ratings),
             "registry_stats": self.registry.get_stats(),
         }
-
-
-from pydantic import BaseModel
