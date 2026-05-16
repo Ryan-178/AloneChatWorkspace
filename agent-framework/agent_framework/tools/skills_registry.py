@@ -1,6 +1,7 @@
 """
 Skills注册系统 - Skills Registry
 管理和注册可复用的技能
+从配置文件加载，替代硬编码
 """
 from typing import Any, Dict, List, Optional, Callable
 from pathlib import Path
@@ -8,6 +9,7 @@ from datetime import datetime
 from pydantic import BaseModel, Field
 
 from agent_framework.core.task import Task
+from agent_framework.configs import get_skills_config
 
 
 class SkillMetadata(BaseModel):
@@ -195,18 +197,22 @@ class DocumentGenerationSkill(Skill):
     """文档生成Skill"""
     
     def __init__(self):
+        config = get_skills_config()
+        skill_config = config.get_skill_config("document_generation")
+        templates = config.get_skill_templates("document_generation")
+        
         metadata = SkillMetadata(
-            name="document_generation",
-            description="生成各类专业文档，支持Markdown、Word、PDF等格式",
-            version="1.0.0",
-            author="system",
-            dependencies=[],
-            tags=["document", "generation", "writing"],
-            category="document",
+            name=skill_config.get("name", "document_generation"),
+            description=skill_config.get("description", "生成各类专业文档"),
+            version=skill_config.get("version", "1.0.0"),
+            author=skill_config.get("author", "system"),
+            dependencies=skill_config.get("dependencies", []),
+            tags=skill_config.get("tags", []),
+            category=skill_config.get("category", "document"),
         )
         super().__init__(metadata)
         
-        self._templates = {
+        self._templates = templates if templates else {
             "report": "# {title}\n\n## 概述\n\n{summary}\n\n## 详细内容\n\n{content}\n\n## 结论\n\n{conclusion}",
             "proposal": "# {title}\n\n## 背景\n\n{background}\n\n## 方案\n\n{solution}\n\n## 预期效果\n\n{expected}",
         }
@@ -243,14 +249,17 @@ class DataAnalysisSkill(Skill):
     """数据分析Skill"""
     
     def __init__(self):
+        config = get_skills_config()
+        skill_config = config.get_skill_config("data_analysis")
+        
         metadata = SkillMetadata(
-            name="data_analysis",
-            description="执行数据分析，包括统计计算、趋势分析、可视化",
-            version="1.0.0",
-            author="system",
-            dependencies=[],
-            tags=["data", "analysis", "statistics"],
-            category="data",
+            name=skill_config.get("name", "data_analysis"),
+            description=skill_config.get("description", "执行数据分析"),
+            version=skill_config.get("version", "1.0.0"),
+            author=skill_config.get("author", "system"),
+            dependencies=skill_config.get("dependencies", []),
+            tags=skill_config.get("tags", []),
+            category=skill_config.get("category", "data"),
         )
         super().__init__(metadata)
     
@@ -289,20 +298,24 @@ class WebResearchSkill(Skill):
     """网络调研Skill"""
     
     def __init__(self):
+        config = get_skills_config()
+        skill_config = config.get_skill_config("web_research")
+        
         metadata = SkillMetadata(
-            name="web_research",
-            description="执行网络信息搜索和整理",
-            version="1.0.0",
-            author="system",
-            dependencies=[],
-            tags=["research", "search", "web"],
-            category="research",
+            name=skill_config.get("name", "web_research"),
+            description=skill_config.get("description", "执行网络信息搜索和整理"),
+            version=skill_config.get("version", "1.0.0"),
+            author=skill_config.get("author", "system"),
+            dependencies=skill_config.get("dependencies", []),
+            tags=skill_config.get("tags", []),
+            category=skill_config.get("category", "research"),
         )
         super().__init__(metadata)
+        self._default_num_results = skill_config.get("default_num_results", 5)
     
     async def execute(self, context: Dict[str, Any]) -> Dict[str, Any]:
         query = context.get("query", "")
-        num_results = context.get("num_results", 5)
+        num_results = context.get("num_results", self._default_num_results)
         
         results = [
             {
@@ -325,16 +338,24 @@ class PPTGenerationSkill(Skill):
     """PPT生成Skill"""
     
     def __init__(self):
+        config = get_skills_config()
+        skill_config = config.get_skill_config("ppt_generation")
+        
         metadata = SkillMetadata(
-            name="ppt_generation",
-            description="自动生成演示文稿",
-            version="1.0.0",
-            author="system",
-            dependencies=[],
-            tags=["ppt", "presentation", "slides"],
-            category="document",
+            name=skill_config.get("name", "ppt_generation"),
+            description=skill_config.get("description", "自动生成演示文稿"),
+            version=skill_config.get("version", "1.0.0"),
+            author=skill_config.get("author", "system"),
+            dependencies=skill_config.get("dependencies", []),
+            tags=skill_config.get("tags", []),
+            category=skill_config.get("category", "document"),
         )
         super().__init__(metadata)
+        self._default_slides = skill_config.get("default_slides", [
+            {"title": "封面", "content": "{title}"},
+            {"title": "概述", "content": "内容概述"},
+            {"title": "总结", "content": "谢谢观看"},
+        ])
     
     async def execute(self, context: Dict[str, Any]) -> Dict[str, Any]:
         title = context.get("title", "演示文稿")
@@ -342,9 +363,8 @@ class PPTGenerationSkill(Skill):
         
         if not slides:
             slides = [
-                {"title": "封面", "content": title},
-                {"title": "概述", "content": "内容概述"},
-                {"title": "总结", "content": "谢谢观看"},
+                {"title": s.get("title", ""), "content": s.get("content", "").replace("{title}", title)}
+                for s in self._default_slides
             ]
         
         return {
@@ -359,14 +379,17 @@ class ReportGenerationSkill(Skill):
     """报告生成Skill"""
     
     def __init__(self):
+        config = get_skills_config()
+        skill_config = config.get_skill_config("report_generation")
+        
         metadata = SkillMetadata(
-            name="report_generation",
-            description="生成专业分析报告",
-            version="1.0.0",
-            author="system",
-            dependencies=[],
-            tags=["report", "analysis", "document"],
-            category="document",
+            name=skill_config.get("name", "report_generation"),
+            description=skill_config.get("description", "生成专业分析报告"),
+            version=skill_config.get("version", "1.0.0"),
+            author=skill_config.get("author", "system"),
+            dependencies=skill_config.get("dependencies", []),
+            tags=skill_config.get("tags", []),
+            category=skill_config.get("category", "document"),
         )
         super().__init__(metadata)
     
@@ -400,3 +423,8 @@ def register_builtin_skills(registry: SkillsRegistry) -> None:
     registry.register(WebResearchSkill())
     registry.register(PPTGenerationSkill())
     registry.register(ReportGenerationSkill())
+
+
+def reload_skills_config():
+    """重新加载技能配置"""
+    get_skills_config().reload()

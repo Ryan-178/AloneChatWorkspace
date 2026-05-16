@@ -60,3 +60,26 @@ tracing:
   export_path: null
   enable_zipkin: false
   zipkin_endpoint: null
+
+# MCP配置
+mcp:
+  enabled: true
+  servers:
+    - name: "filesystem"
+      command: "npx"
+      args: ["-y", "@modelcontextprotocol/server-filesystem", "./data"]
+      env: {}
+      auto_start: false
+      description: "文件系统访问工具"
+      timeout: 30
+    - name: "brave-search"
+      command: "npx"
+      args: ["-y", "@modelcontextprotocol/server-brave-search"]
+      env:
+        BRAVE_API_KEY: "${BRAVE_API_KEY}"
+      auto_start: false
+      description: "Brave搜索工具"
+      timeout: 30
+  default_timeout: 30
+  max_concurrent_calls: 10
+  auto_register_tools: true

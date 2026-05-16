@@ -1,129 +1,31 @@
 """
 文件生成 Prompt 模板
-
-定义各种文件生成的提示词模板
+从配置文件加载，替代硬编码
 """
+from agent_framework.configs import get_prompts_config
+
+_config = get_prompts_config()
 
 FILE_GENERATION_PROMPTS = {
-    "ppt": """你是一个专业的演示文稿设计专家。请根据用户需求，生成结构化的幻灯片内容。
-
-输出格式要求：
-## 标题
-- 要点1
-- 要点2
-- 要点3
-
-## 下一页标题
-- 内容...
-
-请确保：
-1. 每页有明确的主题
-2. 内容简洁有力，每页不超过5个要点
-3. 逻辑清晰连贯
-4. 使用专业术语和表达
-
-用户需求：{user_request}
-上下文信息：{context}
-""",
-
-    "excel": """你是一个数据分析专家。请根据用户需求，生成结构化的表格数据。
-
-输出格式要求（CSV格式）：
-列1,列2,列3,列4
-数据1,数据2,数据3,数据4
-...
-
-请确保：
-1. 数据准确完整
-2. 格式规范统一
-3. 包含必要的统计信息
-4. 列名清晰明确
-
-用户需求：{user_request}
-上下文信息：{context}
-""",
-
-    "word": """你是一个文档撰写专家。请根据用户需求，生成专业的文档内容。
-
-输出格式要求：
-# 一级标题
-
-正文内容...
-
-## 二级标题
-
-- 要点1
-- 要点2
-
-### 三级标题
-
-详细说明...
-
-请确保：
-1. 结构层次清晰
-2. 内容详实准确
-3. 语言专业规范
-4. 逻辑连贯
-
-用户需求：{user_request}
-上下文信息：{context}
-""",
-
-    "report": """你是一个报告撰写专家。请根据提供的数据和分析，生成专业的复盘报告。
-
-报告结构：
-# 报告标题
-
-## 一、项目概述
-项目背景、目标、范围
-
-## 二、执行情况
-- 完成情况
-- 关键里程碑
-- 数据指标
-
-## 三、成果与亮点
-- 主要成果
-- 创新亮点
-
-## 四、问题与挑战
-- 遇到的问题
-- 解决方案
-
-## 五、经验总结
-- 成功经验
-- 改进建议
-
-## 六、下一步计划
-- 后续工作
-- 资源需求
-
-用户需求：{user_request}
-数据信息：{context}
-""",
-
-    "code": """你是一个代码生成专家。请根据用户需求，生成高质量的代码。
-
-请确保：
-1. 代码结构清晰
-2. 注释完整
-3. 遵循最佳实践
-4. 考虑错误处理
-
-用户需求：{user_request}
-上下文信息：{context}
-""",
-
-    "data_analysis": """你是一个数据分析专家。请对提供的数据进行深入分析。
-
-请提供：
-1. 数据概览
-2. 关键发现
-3. 趋势分析
-4. 异常检测
-5. 建议措施
-
-数据信息：{data}
-分析需求：{user_request}
-"""
+    "ppt": _config.get_file_generation_prompt("ppt"),
+    "excel": _config.get_file_generation_prompt("excel"),
+    "word": _config.get_file_generation_prompt("word"),
+    "report": _config.get_file_generation_prompt("report"),
+    "code": _config.get_file_generation_prompt("code"),
+    "data_analysis": _config.get_file_generation_prompt("data_analysis"),
 }
+
+
+def reload_prompts():
+    """重新加载提示词配置"""
+    global FILE_GENERATION_PROMPTS, _config
+    
+    _config = get_prompts_config().reload()
+    FILE_GENERATION_PROMPTS = {
+        "ppt": _config.get_file_generation_prompt("ppt"),
+        "excel": _config.get_file_generation_prompt("excel"),
+        "word": _config.get_file_generation_prompt("word"),
+        "report": _config.get_file_generation_prompt("report"),
+        "code": _config.get_file_generation_prompt("code"),
+        "data_analysis": _config.get_file_generation_prompt("data_analysis"),
+    }

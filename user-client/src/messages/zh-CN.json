@@ -1,0 +1,90 @@
+{
+  "common": {
+    "loading": "加载中...",
+    "save": "保存",
+    "cancel": "取消",
+    "confirm": "确认",
+    "delete": "删除",
+    "edit": "编辑",
+    "create": "创建",
+    "search": "搜索"
+  },
+  "auth": {
+    "login": {
+      "title": "登录",
+      "description": "输入您的账号信息登录系统",
+      "username": "用户名",
+      "usernamePlaceholder": "请输入用户名",
+      "password": "密码",
+      "passwordPlaceholder": "请输入密码",
+      "submit": "登录",
+      "noAccount": "还没有账号？",
+      "register": "立即注册",
+      "success": "登录成功",
+      "error": "登录失败",
+      "errorDescription": "请检查用户名和密码"
+    },
+    "register": {
+      "title": "注册",
+      "description": "创建新账号",
+      "username": "用户名",
+      "email": "邮箱",
+      "password": "密码",
+      "confirmPassword": "确认密码",
+      "submit": "注册",
+      "hasAccount": "已有账号？",
+      "login": "立即登录"
+    }
+  },
+  "nav": {
+    "chat": "聊天",
+    "agent": "Agent",
+    "workspace": "工作区",
+    "tasks": "任务",
+    "skills": "Skills",
+    "settings": "设置"
+  },
+  "chat": {
+    "searchPlaceholder": "搜索对话",
+    "noConversations": "暂无对话",
+    "startNew": "开始一个新的对话吧",
+    "newChat": "新建对话",
+    "selectConversation": "选择一个对话",
+    "selectOrNew": "从左侧选择一个对话开始聊天，或创建新对话"
+  },
+  "settings": {
+    "title": "设置",
+    "profile": {
+      "title": "个人资料",
+      "description": "管理您的账号信息",
+      "username": "用户名",
+      "email": "邮箱",
+      "save": "保存更改"
+    },
+    "appearance": {
+      "title": "外观",
+      "description": "自定义应用外观",
+      "theme": "主题",
+      "themeDescription": "选择浅色或深色主题"
+    },
+    "api": {
+      "title": "API 配置",
+      "description": "配置 LLM API Key",
+      "key": "API Key",
+      "baseUrl": "API Base URL",
+      "save": "保存配置"
+    },
+    "notifications": {
+      "title": "通知",
+      "description": "管理通知设置",
+      "desktop": "桌面通知",
+      "desktopDescription": "接收桌面推送通知",
+      "sound": "消息声音",
+      "soundDescription": "收到新消息时播放声音"
+    }
+  },
+  "metadata": {
+    "title": "AloneChat",
+    "description": "AI Agent 协作平台 - 实时聊天 × 智能Agent × RAG检索 × 多Agent编排"
+  }
+}

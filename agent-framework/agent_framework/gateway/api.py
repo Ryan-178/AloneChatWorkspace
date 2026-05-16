@@ -1,10 +1,13 @@
 """
 REST API - 模式管理、任务管理、Skills管理
+集成用户端API：认证、会话管理
+集成MCP API：MCP服务器管理
 """
 from typing import Any, Dict, List, Optional
 from datetime import datetime
 from fastapi import FastAPI, HTTPException, Depends, Query
 from fastapi.responses import JSONResponse
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 
 from agent_framework.core.types import AgentMode, TaskStatus
@@ -13,9 +16,24 @@ from agent_framework.agent.mtc_agent import MTCAgent
 from agent_framework.agent.code_agent import CodeAgent
 from agent_framework.tools.skills_registry import SkillsRegistry, register_builtin_skills
 from agent_framework.tools.skills_marketplace import SkillsMarketplace
+from agent_framework.gateway.session import SessionManager
+from agent_framework.gateway.user_api import create_user_api
+from agent_framework.gateway.mcp_api import create_mcp_api
 
 
 app = FastAPI(title="MTC/CODE Mode API", version="1.0.0")
+
+session_manager = SessionManager()
+create_user_api(app, session_manager)
+create_mcp_api(app)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 
 class ModeSwitchRequest(BaseModel):
@@ -53,6 +71,14 @@ class SkillExecuteResponse(BaseModel):
     success: bool
     result: Optional[Dict[str, Any]] = None
     error: Optional[str] = None
+
+
+class RemoteSkillInstallRequest(BaseModel):
+    url: str = Field(..., description="GitHub URL 或 skills.sh URL")
+    skill_name: Optional[str] = Field(None, description="指定的 skill 名称")
+    branch: Optional[str] = Field(None, description="指定的分支")
+    global_install: bool = Field(default=False, description="是否全局安装")
+    force: bool = Field(default=False, description="强制覆盖")
 
 
 class ArtifactResponse(BaseModel):
@@ -377,3 +403,56 @@ async def health_check():
         "timestamp": datetime.utcnow().isoformat(),
         "version": "1.0.0",
     }
+
+
+@app.get("/api/skills/remote/search")
+async def search_remote_skills(query: str = Query(..., description="搜索关键词")):
+    """搜索远程 Skills (skills.sh)"""
+    skills = await skills_marketplace.search_remote(query)
+    return {
+        "skills": [skill.model_dump() for skill in skills],
+        "total": len(skills),
+        "query": query,
+    }
+
+
+@app.get("/api/skills/remote/trending")
+async def get_trending_skills():
+    """获取热门远程 Skills"""
+    skills = await skills_marketplace.search_remote("")
+    return {
+        "skills": [skill.model_dump() for skill in skills[:10]],
+        "period": "all",
+    }
+
+
+@app.get("/api/skills/remote/installed")
+async def list_installed_remote_skills():
+    """列出已安装的远程 Skills"""
+    skills = skills_marketplace.list_installed_remote()
+    return {
+        "skills": skills,
+        "total": len(skills),
+    }
+
+
+@app.post("/api/skills/remote/install")
+async def install_remote_skill(request: RemoteSkillInstallRequest):
+    """从远程 URL 安装 Skill"""
+    result = await skills_marketplace.install_from_remote(
+        url=request.url,
+        skill_name=request.skill_name,
+        branch=request.branch,
+        global_install=request.global_install,
+        force=request.force,
+    )
+    return result
+
+
+@app.delete("/api/skills/remote/{skill_name}")
+async def uninstall_remote_skill(skill_name: str):
+    """卸载远程安装的 Skill"""
+    result = skills_marketplace.uninstall_remote(skill_name)
+    if not result.get("success"):
+        raise HTTPException(status_code=404, detail=result.get("error"))
+    return result

@@ -1,10 +1,12 @@
 """
 意图澄清系统 - Intent Clarifier
 用于澄清模糊的用户需求
+从配置文件加载，替代硬编码
 """
 from typing import Any, Dict, List, Optional
 
 from agent_framework.core.base_llm import Message
+from agent_framework.configs import get_intent_config
 
 
 class ClarificationQuestion:
@@ -40,34 +42,33 @@ class ClarificationQuestion:
 class IntentClarifier:
     """意图澄清系统"""
     
-    def __init__(self, llm, max_questions: int = 3):
+    def __init__(self, llm, max_questions: int = None):
         self.llm = llm
-        self.max_questions = max_questions
+        self._config = get_intent_config()
+        self.max_questions = max_questions or self._config.max_questions
         self.collected_answers: Dict[str, Any] = {}
         self.questions: List[ClarificationQuestion] = []
     
     def should_clarify(self, task: str) -> bool:
         """判断是否需要澄清意图"""
-        vague_keywords = [
-            "帮我", "弄一下", "处理", "做个", "写个",
-            "分析", "整理", "优化", "改进", "修改",
-            "看看", "检查", "弄好",
-        ]
+        vague_keywords = self._config.vague_keywords
+        specific_indicators = self._config.specific_indicators
+        vague_indicators = self._config.vague_indicators
         
-        specific_indicators = [
+        specific_checks = [
             any(char.isdigit() for char in task),
-            len(task) > 50,
-            any(kw in task.lower() for kw in ["具体", "详细", "格式", "要求"]),
-            task.count("的") >= 2,
+            len(task) > specific_indicators.get("min_length_for_specific", 50),
+            any(kw in task.lower() for kw in specific_indicators.get("keywords", [])),
+            task.count("的") >= specific_indicators.get("min_de_count", 2),
         ]
         
-        vague_indicators = [
-            len(task) < 20,
-            any(keyword in task for keyword in vague_keywords) and len(task.split()) < 8,
-            not any(specific for specific in specific_indicators),
+        vague_checks = [
+            len(task) < vague_indicators.get("max_length_for_vague", 20),
+            any(keyword in task for keyword in vague_keywords) and len(task.split()) < vague_indicators.get("max_word_count", 8),
+            not any(specific for specific in specific_checks),
         ]
         
-        return sum(vague_indicators) >= 2
+        return sum(vague_checks) >= 2
     
     def analyze(self, task: str) -> Dict[str, Any]:
         """分析用户请求意图"""
@@ -88,77 +89,61 @@ class IntentClarifier:
             return self.questions
         
         task_lower = task.lower()
+        task_keywords = self._config.task_keywords
+        question_templates = self._config.question_templates
         
-        if "文档" in task or "报告" in task or "写" in task:
-            self.questions.append(ClarificationQuestion(
-                question_id="output_format",
-                question_text="您希望输出什么格式的文档？",
-                question_type="choice",
-                options=["Markdown", "Word文档", "PDF", "Excel表格", "PPT演示文稿"],
-                required=True,
-            ))
-            
-            self.questions.append(ClarificationQuestion(
-                question_id="detail_level",
-                question_text="您需要多详细的内容？",
-                question_type="choice",
-                options=["简要概述（1-2页）", "标准详细（3-5页）", "非常详细（5页以上）"],
-                required=True,
-            ))
+        document_keywords = task_keywords.get("document", [])
+        data_keywords = task_keywords.get("data", [])
+        research_keywords = task_keywords.get("research", [])
         
-        if "数据" in task or "分析" in task:
-            self.questions.append(ClarificationQuestion(
-                question_id="data_source",
-                question_text="数据来源是什么？",
-                question_type="text",
-                required=True,
-            ))
-            
-            self.questions.append(ClarificationQuestion(
-                question_id="analysis_type",
-                question_text="您需要什么类型的分析？",
-                question_type="choice",
-                options=["描述性统计", "趋势分析", "对比分析", "相关性分析"],
-                required=True,
-            ))
+        if any(kw in task for kw in document_keywords):
+            for q_template in question_templates.get("document", []):
+                self.questions.append(ClarificationQuestion(
+                    question_id=q_template.get("id", ""),
+                    question_text=q_template.get("question", ""),
+                    question_type=q_template.get("type", "text"),
+                    options=q_template.get("options", []),
+                    required=q_template.get("required", True),
+                ))
         
-        if "调研" in task or "搜索" in task:
-            self.questions.append(ClarificationQuestion(
-                question_id="research_scope",
-                question_text="调研范围是什么？",
-                question_type="text",
-                required=True,
-            ))
-            
-            self.questions.append(ClarificationQuestion(
-                question_id="output_requirements",
-                question_text="调研报告需要包含哪些内容？",
-                question_type="choice",
-                options=["基本信息", "详细分析", "对比评估", "建议方案"],
-                required=True,
-            ))
+        if any(kw in task for kw in data_keywords):
+            for q_template in question_templates.get("data", []):
+                self.questions.append(ClarificationQuestion(
+                    question_id=q_template.get("id", ""),
+                    question_text=q_template.get("question", ""),
+                    question_type=q_template.get("type", "text"),
+                    options=q_template.get("options", []),
+                    required=q_template.get("required", True),
+                ))
+        
+        if any(kw in task for kw in research_keywords):
+            for q_template in question_templates.get("research", []):
+                self.questions.append(ClarificationQuestion(
+                    question_id=q_template.get("id", ""),
+                    question_text=q_template.get("question", ""),
+                    question_type=q_template.get("type", "text"),
+                    options=q_template.get("options", []),
+                    required=q_template.get("required", True),
+                ))
         
         if len(self.questions) == 0:
-            self.questions.append(ClarificationQuestion(
-                question_id="goal",
-                question_text="您希望达到什么目标？",
-                question_type="text",
-                required=True,
-            ))
-            
-            self.questions.append(ClarificationQuestion(
-                question_id="constraints",
-                question_text="有什么特殊要求或限制吗？",
-                question_type="text",
-                required=False,
-            ))
+            for q_template in question_templates.get("default", []):
+                self.questions.append(ClarificationQuestion(
+                    question_id=q_template.get("id", ""),
+                    question_text=q_template.get("question", ""),
+                    question_type=q_template.get("type", "text"),
+                    options=q_template.get("options", []),
+                    required=q_template.get("required", True),
+                ))
         
-        self.questions.append(ClarificationQuestion(
-            question_id="target_audience",
-            question_text="这份产出的目标读者是谁？（可选）",
-            question_type="text",
-            required=False,
-        ))
+        for q_template in question_templates.get("common", []):
+            self.questions.append(ClarificationQuestion(
+                question_id=q_template.get("id", ""),
+                question_text=q_template.get("question", ""),
+                question_type=q_template.get("type", "text"),
+                options=q_template.get("options", []),
+                required=q_template.get("required", False),
+            ))
         
         return self.questions[:self.max_questions]
     
@@ -205,3 +190,8 @@ class IntentClarifier:
             "collected_answers": self.collected_answers,
             "is_complete": self.is_complete(),
         }
+
+
+def reload_intent_config():
+    """重新加载意图澄清配置"""
+    get_intent_config().reload()

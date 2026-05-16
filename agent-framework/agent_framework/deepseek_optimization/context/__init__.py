@@ -24,25 +24,112 @@ from .feedback_generator import (
     ContextFeedbackGenerator,
     ContextFeedback
 )
+from .token_estimator import (
+    TokenEstimator,
+    TokenEstimate,
+    TokenBudget,
+    EncodingType,
+    EstimationMode
+)
+from .session_manager import (
+    SessionManager,
+    SessionMetadata,
+    SessionSummary
+)
+from .context_snapshot import (
+    ContextSnapshot,
+    SnapshotMetadata,
+    SnapshotData
+)
+from .compression_strategy import (
+    CompressionStrategy,
+    CompressionResult,
+    CompressionPriority,
+    TailPreserveStrategy,
+    ImportanceBasedStrategy,
+    SemanticClusterStrategy,
+    HybridStrategy,
+    CompressionStrategyFactory
+)
+from .semantic_retriever import (
+    SemanticRetriever,
+    SearchResult,
+    SearchQuery,
+    SearchMode
+)
+from .context_cache import (
+    ContextCache,
+    ContextPreloader,
+    CacheEntry,
+    CacheStats
+)
+from .context_config import (
+    ContextConfig,
+    ContextManagementConfig,
+    TokenEstimationConfig,
+    CompressionConfig,
+    StorageConfig,
+    CacheConfig,
+    SessionConfig
+)
+from .context_monitor import (
+    ContextMonitor,
+    PerformanceMetrics,
+    HealthStatus,
+    HealthCheckResult
+)
 
 __all__ = [
-    # 基础管理
     "WindowManager",
     "ContextCompressor",
-    # 重要性评估
     "MessageRanker",
     "ImportanceCategory",
     "MessageImportance",
-    # 存储引擎
     "StructuredStorageEngine",
     "StoredMessage",
     "StorageStats",
-    # 主管理器
     "MegaContextManager",
     "ContextDecision",
     "ManagedMessage",
     "ContextStats",
-    # 反馈系统
     "ContextFeedbackGenerator",
-    "ContextFeedback"
+    "ContextFeedback",
+    "TokenEstimator",
+    "TokenEstimate",
+    "TokenBudget",
+    "EncodingType",
+    "EstimationMode",
+    "SessionManager",
+    "SessionMetadata",
+    "SessionSummary",
+    "ContextSnapshot",
+    "SnapshotMetadata",
+    "SnapshotData",
+    "CompressionStrategy",
+    "CompressionResult",
+    "CompressionPriority",
+    "TailPreserveStrategy",
+    "ImportanceBasedStrategy",
+    "SemanticClusterStrategy",
+    "HybridStrategy",
+    "CompressionStrategyFactory",
+    "SemanticRetriever",
+    "SearchResult",
+    "SearchQuery",
+    "SearchMode",
+    "ContextCache",
+    "ContextPreloader",
+    "CacheEntry",
+    "CacheStats",
+    "ContextConfig",
+    "ContextManagementConfig",
+    "TokenEstimationConfig",
+    "CompressionConfig",
+    "StorageConfig",
+    "CacheConfig",
+    "SessionConfig",
+    "ContextMonitor",
+    "PerformanceMetrics",
+    "HealthStatus",
+    "HealthCheckResult",
 ]

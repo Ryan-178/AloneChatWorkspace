@@ -1,0 +1,90 @@
+{
+  "common": {
+    "loading": "Loading...",
+    "save": "Save",
+    "cancel": "Cancel",
+    "confirm": "Confirm",
+    "delete": "Delete",
+    "edit": "Edit",
+    "create": "Create",
+    "search": "Search"
+  },
+  "auth": {
+    "login": {
+      "title": "Login",
+      "description": "Enter your credentials to login",
+      "username": "Username",
+      "usernamePlaceholder": "Enter username",
+      "password": "Password",
+      "passwordPlaceholder": "Enter password",
+      "submit": "Login",
+      "noAccount": "Don't have an account?",
+      "register": "Sign up",
+      "success": "Login successful",
+      "error": "Login failed",
+      "errorDescription": "Please check your username and password"
+    },
+    "register": {
+      "title": "Register",
+      "description": "Create a new account",
+      "username": "Username",
+      "email": "Email",
+      "password": "Password",
+      "confirmPassword": "Confirm Password",
+      "submit": "Register",
+      "hasAccount": "Already have an account?",
+      "login": "Sign in"
+    }
+  },
+  "nav": {
+    "chat": "Chat",
+    "agent": "Agent",
+    "workspace": "Workspace",
+    "tasks": "Tasks",
+    "skills": "Skills",
+    "settings": "Settings"
+  },
+  "chat": {
+    "searchPlaceholder": "Search conversations",
+    "noConversations": "No conversations",
+    "startNew": "Start a new conversation",
+    "newChat": "New Chat",
+    "selectConversation": "Select a conversation",
+    "selectOrNew": "Select a conversation from the left or create a new one"
+  },
+  "settings": {
+    "title": "Settings",
+    "profile": {
+      "title": "Profile",
+      "description": "Manage your account information",
+      "username": "Username",
+      "email": "Email",
+      "save": "Save Changes"
+    },
+    "appearance": {
+      "title": "Appearance",
+      "description": "Customize app appearance",
+      "theme": "Theme",
+      "themeDescription": "Choose between light and dark theme"
+    },
+    "api": {
+      "title": "API Configuration",
+      "description": "Configure LLM API Key",
+      "key": "API Key",
+      "baseUrl": "API Base URL",
+      "save": "Save Configuration"
+    },
+    "notifications": {
+      "title": "Notifications",
+      "description": "Manage notification settings",
+      "desktop": "Desktop Notifications",
+      "desktopDescription": "Receive desktop push notifications",
+      "sound": "Message Sound",
+      "soundDescription": "Play sound when receiving new messages"
+    }
+  },
+  "metadata": {
+    "title": "AloneChat",
+    "description": "AI Agent Collaboration Platform - Real-time Chat × Intelligent Agent × RAG Retrieval × Multi-Agent Orchestration"
+  }
+}

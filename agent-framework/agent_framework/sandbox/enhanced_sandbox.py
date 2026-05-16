@@ -1,6 +1,7 @@
 """
 增强沙箱环境 - Enhanced Sandbox
 支持项目文件夹隔离、文件权限控制、命令白名单等
+从配置文件加载，替代硬编码
 """
 import asyncio
 import os
@@ -12,6 +13,7 @@ from pathlib import Path
 from enum import Enum
 
 from agent_framework.core.types import FilePermission, AgentMode
+from agent_framework.configs import get_sandbox_config
 
 
 class SandboxResult:
@@ -23,68 +25,64 @@ class SandboxResult:
     permission_denied: bool = False
 
 
+def _load_sandbox_config():
+    """加载沙箱配置"""
+    return get_sandbox_config()
+
+
 class EnhancedSandbox:
     """
     增强沙箱 - 支持项目文件夹隔离和权限控制
     """
+
+    _config = _load_sandbox_config()
     
-    DEFAULT_ALLOWED_COMMANDS = {
-        "python", "python3", "node", "ruby", "perl",
-        "ls", "cat", "echo", "head", "tail", "grep", "wc",
-        "sort", "uniq", "cut", "tr", "sed", "awk",
-        "find", "diff", "cmp", "file", "strings",
-        "bc", "dc", "expr",
-    }
+    DEFAULT_ALLOWED_COMMANDS = _config.get_mtc_allowed_commands()
     
-    MTC_ALLOWED_COMMANDS = {
-        "python", "python3",
-        "ls", "cat", "echo", "head", "tail", "grep", "wc",
-        "sort", "uniq", "cut", "tr",
-    }
+    MTC_ALLOWED_COMMANDS = _config.get_mtc_allowed_commands()
     
-    CODE_ALLOWED_COMMANDS = {
-        "python", "python3", "node", "npm", "npx", "yarn",
-        "git", "pip", "pip3",
-        "ls", "cat", "echo", "head", "tail", "grep", "wc",
-        "sort", "uniq", "cut", "tr", "sed", "awk",
-        "find", "diff", "cmp", "file",
-        "make", "cmake",
-        "pytest", "unittest",
-        "ruff", "black", "mypy", "flake8",
-    }
+    CODE_ALLOWED_COMMANDS = _config.get_code_allowed_commands()
     
-    FORBIDDEN_COMMANDS = {
-        "rm", "mv", "chmod", "chown", "sudo", "su",
-        "wget", "curl", "nc", "netcat", "telnet", "ssh", "scp",
-        "bash", "sh", "zsh", "csh", "tcsh", "fish",
-        "mkfs", "fdisk", "dd", "mount", "umount",
-        "kill", "pkill", "killall",
-        "reboot", "shutdown", "halt", "poweroff",
-        "crontab", "at", "batch",
-        "iptables", "nft", "ufw",
-        "useradd", "userdel", "usermod", "groupadd", "groupdel",
-        "passwd", "chpasswd",
-        "apt", "apt-get", "yum", "dnf", "pacman", "brew",
-        "docker", "kubectl", "helm",
-    }
+    FORBIDDEN_COMMANDS = set(_config.forbidden_commands)
     
     def __init__(
         self,
         mode: AgentMode = AgentMode.MTC,
         project_folder: Optional[str] = None,
-        max_memory_mb: int = 512,
-        max_cpu_time_seconds: int = 30,
-        max_wall_time_seconds: int = 60,
-        max_output_size: int = 10 * 1024 * 1024,
+        max_memory_mb: int = None,
+        max_cpu_time_seconds: int = None,
+        max_wall_time_seconds: int = None,
+        max_output_size: int = None,
         allowed_commands: Optional[Set[str]] = None,
         allowed_permissions: Optional[Set[FilePermission]] = None,
     ):
+        config = _load_sandbox_config()
+        
         self.mode = mode
         self.project_folder = project_folder or tempfile.mkdtemp(prefix=f"sandbox_{mode.value}_")
-        self.max_memory_mb = max_memory_mb
-        self.max_cpu_time_seconds = max_cpu_time_seconds
-        self.max_wall_time_seconds = max_wall_time_seconds
-        self.max_output_size = max_output_size
+        
+        mtc_cfg = config.mtc_config
+        code_cfg = config.code_config
+        
+        if max_memory_mb is None:
+            self.max_memory_mb = mtc_cfg.get("max_memory_mb", 256) if mode == AgentMode.MTC else code_cfg.get("max_memory_mb", 512)
+        else:
+            self.max_memory_mb = max_memory_mb
+            
+        if max_cpu_time_seconds is None:
+            self.max_cpu_time_seconds = mtc_cfg.get("max_cpu_time_seconds", 15) if mode == AgentMode.MTC else code_cfg.get("max_cpu_time_seconds", 30)
+        else:
+            self.max_cpu_time_seconds = max_cpu_time_seconds
+            
+        if max_wall_time_seconds is None:
+            self.max_wall_time_seconds = mtc_cfg.get("max_wall_time_seconds", 30) if mode == AgentMode.MTC else code_cfg.get("max_wall_time_seconds", 60)
+        else:
+            self.max_wall_time_seconds = max_wall_time_seconds
+            
+        if max_output_size is None:
+            self.max_output_size = mtc_cfg.get("max_output_size", 10485760) if mode == AgentMode.MTC else code_cfg.get("max_output_size", 10485760)
+        else:
+            self.max_output_size = max_output_size
         
         if allowed_commands:
             self.allowed_commands = allowed_commands
@@ -96,9 +94,12 @@ class EnhancedSandbox:
         if allowed_permissions:
             self.allowed_permissions = allowed_permissions
         elif mode == AgentMode.CODE:
-            self.allowed_permissions = {FilePermission.READ, FilePermission.WRITE, FilePermission.EXECUTE}
+            self.allowed_permissions = config.get_code_permissions()
         else:
-            self.allowed_permissions = {FilePermission.READ, FilePermission.WRITE}
+            self.allowed_permissions = config.get_mtc_permissions()
+        
+        self.dangerous_flags = set(config.dangerous_flags)
+        self.default_env = config.default_env
         
         Path(self.project_folder).mkdir(parents=True, exist_ok=True)
         
@@ -150,12 +151,8 @@ class EnhancedSandbox:
         if cmd_name not in self.allowed_commands:
             return False, f"命令 '{cmd_name}' 不在白名单中。允许的命令: {', '.join(sorted(self.allowed_commands))}"
         
-        dangerous_flags = {
-            "-c", "--command", "-e", "--eval", "-exec",
-            "--system", "--shell", "--sh",
-        }
         for arg in command[1:]:
-            if arg in dangerous_flags:
+            if arg in self.dangerous_flags:
                 return False, f"禁止使用的参数: {arg}"
         
         return True, ""
@@ -183,6 +180,12 @@ class EnhancedSandbox:
                 permission_denied=True,
             )
         
+        exec_env = dict(self.default_env)
+        exec_env["HOME"] = self.project_folder
+        exec_env["TMPDIR"] = self.project_folder
+        if env:
+            exec_env.update(env)
+        
         try:
             proc = await asyncio.wait_for(
                 asyncio.create_subprocess_exec(
@@ -190,11 +193,7 @@ class EnhancedSandbox:
                     stdout=asyncio.subprocess.PIPE,
                     stderr=asyncio.subprocess.PIPE,
                     cwd=self.project_folder,
-                    env=env or {
-                        "PATH": "/usr/bin:/bin",
-                        "HOME": self.project_folder,
-                        "TMPDIR": self.project_folder,
-                    },
+                    env=exec_env,
                 ),
                 timeout=5,
             )
@@ -326,23 +325,35 @@ class EnhancedSandbox:
 
 def create_mtc_sandbox(project_folder: Optional[str] = None) -> EnhancedSandbox:
     """创建MTC模式沙箱"""
+    config = _load_sandbox_config()
+    mtc_cfg = config.mtc_config
+    
     return EnhancedSandbox(
         mode=AgentMode.MTC,
         project_folder=project_folder,
-        max_memory_mb=256,
-        max_cpu_time_seconds=15,
-        max_wall_time_seconds=30,
-        allowed_permissions={FilePermission.READ, FilePermission.WRITE},
+        max_memory_mb=mtc_cfg.get("max_memory_mb", 256),
+        max_cpu_time_seconds=mtc_cfg.get("max_cpu_time_seconds", 15),
+        max_wall_time_seconds=mtc_cfg.get("max_wall_time_seconds", 30),
+        allowed_permissions=config.get_mtc_permissions(),
     )
 
 
 def create_code_sandbox(project_folder: Optional[str] = None) -> EnhancedSandbox:
     """创建CODE模式沙箱"""
+    config = _load_sandbox_config()
+    code_cfg = config.code_config
+    
     return EnhancedSandbox(
         mode=AgentMode.CODE,
         project_folder=project_folder,
-        max_memory_mb=512,
-        max_cpu_time_seconds=30,
-        max_wall_time_seconds=60,
-        allowed_permissions={FilePermission.READ, FilePermission.WRITE, FilePermission.EXECUTE},
+        max_memory_mb=code_cfg.get("max_memory_mb", 512),
+        max_cpu_time_seconds=code_cfg.get("max_cpu_time_seconds", 30),
+        max_wall_time_seconds=code_cfg.get("max_wall_time_seconds", 60),
+        allowed_permissions=config.get_code_permissions(),
     )
+
+
+def reload_sandbox_config():
+    """重新加载沙箱配置"""
+    global EnhancedSandbox
+    EnhancedSandbox._config = get_sandbox_config().reload()

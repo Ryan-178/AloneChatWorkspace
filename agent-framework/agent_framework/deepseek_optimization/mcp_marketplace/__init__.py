@@ -14,6 +14,8 @@ from .types import (
 from .registry import MCPServerRegistry
 from .client import MCPClient
 from .loader import MCPServerLoader
+from .adapter import MCPToolAdapter, MCPToolRegistry
+from .manager import MCPManager, get_mcp_manager, init_mcp_manager
 
 __all__ = [
     "MCPServer",
@@ -24,5 +26,10 @@ __all__ = [
     "MCPServerRegistry",
     "MCPClient",
     "MCPServerLoader",
+    "MCPToolAdapter",
+    "MCPToolRegistry",
+    "MCPManager",
+    "get_mcp_manager",
+    "init_mcp_manager",
 ]
 

@@ -15,6 +15,13 @@ from .model_config import (
     DEEPSEEK_PRICING,
     DEEPSEEK_CONTEXT_WINDOWS,
 )
+from .temperature_controller import (
+    TemperatureController,
+    TemperatureManager,
+    TaskType,
+    AdjustmentStrategy,
+    FeedbackSignal,
+)
 
 
 @dataclass
@@ -95,13 +102,29 @@ class DeepSeekProvider(BaseLLM):
     """
     DeepSeek V4专属Provider
     All in DeepSeek V4，极致优化，直接API调用
+    支持动态温度调整
     """
 
-    def __init__(self, config: Optional[DeepSeekConfig] = None):
+    def __init__(
+        self, 
+        config: Optional[DeepSeekConfig] = None,
+        temperature_controller: Optional[TemperatureController] = None,
+        enable_dynamic_temperature: bool = True,
+    ):
         self.config = config or DeepSeekConfig()
         self.usage = DeepSeekUsage()
         self._client: Optional[httpx.AsyncClient] = None
         self._init_client()
+        
+        self.enable_dynamic_temperature = enable_dynamic_temperature
+        if temperature_controller:
+            self._temperature_controller = temperature_controller
+        elif enable_dynamic_temperature:
+            self._temperature_controller = TemperatureController()
+        else:
+            self._temperature_controller = None
+        
+        self._current_task_type: Optional[TaskType] = None
 
     def _init_client(self):
         """初始化HTTP客户端"""
@@ -165,14 +188,16 @@ class DeepSeekProvider(BaseLLM):
         config: Optional[DeepSeekConfig] = None
     ) -> Message:
         """
-        异步聊天调用 - 核心方法，支持KV Cache
+        异步聊天调用 - 核心方法，支持KV Cache和动态温度调整
         """
         cfg = config or self.config
+        
+        effective_temperature = self._get_effective_temperature(messages, config)
 
         request_payload = {
             "model": cfg.model.value,
             "messages": self._messages_to_deepseek(messages),
-            "temperature": cfg.temperature,
+            "temperature": effective_temperature,
             "max_tokens": cfg.max_tokens,
             "top_p": cfg.top_p,
         }
@@ -218,14 +243,16 @@ class DeepSeekProvider(BaseLLM):
         config: Optional[DeepSeekConfig] = None
     ) -> AsyncGenerator[Chunk, None]:
         """
-        流式输出 - DeepSeek V4优化，支持KV Cache
+        流式输出 - DeepSeek V4优化，支持KV Cache和动态温度调整
         """
         cfg = config or self.config
+        
+        effective_temperature = self._get_effective_temperature(messages, config)
 
         request_payload = {
             "model": cfg.model.value,
             "messages": self._messages_to_deepseek(messages),
-            "temperature": cfg.temperature,
+            "temperature": effective_temperature,
             "max_tokens": cfg.max_tokens,
             "top_p": cfg.top_p,
             "stream": True,
@@ -299,3 +326,102 @@ class DeepSeekProvider(BaseLLM):
     def reset_usage(self):
         """重置使用统计"""
         self.usage = DeepSeekUsage()
+    
+    def set_task_type(self, task_type: TaskType) -> float:
+        """
+        设置当前任务类型，自动调整温度
+        
+        Args:
+            task_type: 任务类型
+            
+        Returns:
+            调整后的温度值
+        """
+        self._current_task_type = task_type
+        if self._temperature_controller:
+            return self._temperature_controller.set_task_type(task_type)
+        return self.config.temperature
+    
+    def get_dynamic_temperature(
+        self,
+        context: Optional[str] = None,
+        feedback: Optional[FeedbackSignal] = None,
+    ) -> float:
+        """
+        获取动态调整后的温度
+        
+        Args:
+            context: 上下文内容
+            feedback: 反馈信号
+            
+        Returns:
+            动态调整后的温度值
+        """
+        if not self._temperature_controller:
+            return self.config.temperature
+        
+        return self._temperature_controller.get_temperature(
+            task_type=self._current_task_type,
+            context=context,
+            feedback=feedback,
+        )
+    
+    def update_feedback(self, feedback: FeedbackSignal) -> None:
+        """
+        更新反馈信号，用于自适应温度调整
+        
+        Args:
+            feedback: 反馈信号
+        """
+        if self._temperature_controller:
+            self._temperature_controller.update_feedback(feedback)
+    
+    def adjust_temperature_for_context(
+        self,
+        context: str,
+        token_count: Optional[int] = None,
+    ) -> float:
+        """
+        根据上下文复杂度调整温度
+        
+        Args:
+            context: 上下文内容
+            token_count: Token数量
+            
+        Returns:
+            调整后的温度值
+        """
+        if self._temperature_controller:
+            return self._temperature_controller.adjust_for_context_complexity(
+                context, token_count
+            )
+        return self.config.temperature
+    
+    def get_temperature_stats(self) -> Dict[str, Any]:
+        """
+        获取温度控制器统计信息
+        """
+        if self._temperature_controller:
+            return self._temperature_controller.get_statistics()
+        return {"dynamic_temperature_enabled": False}
+    
+    def _get_effective_temperature(
+        self,
+        messages: List[Message],
+        config: Optional[DeepSeekConfig] = None,
+    ) -> float:
+        """
+        获取有效温度值
+        
+        如果启用了动态温度调整，会根据消息内容自动调整
+        """
+        if not self._temperature_controller:
+            cfg = config or self.config
+            return cfg.temperature
+        
+        context = "\n".join(m.content for m in messages if m.content)
+        
+        return self._temperature_controller.get_temperature(
+            task_type=self._current_task_type,
+            context=context,
+        )
