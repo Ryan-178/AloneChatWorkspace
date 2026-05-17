@@ -39,6 +39,17 @@ from .security import (
     EncryptionManager,
     DataProtectionManager
 )
+from .optimizer import (
+    DeepSeekOptimizer,
+    RequestQueue,
+    CostController,
+    BatchProcessor,
+    RetryPolicy,
+    DegradationStrategy,
+    Priority,
+    CostBudget,
+    OptimizerStats,
+)
 
 __version__ = "2.0.0"
 __author__ = "DeepSeek Optimization Team"
@@ -76,5 +87,15 @@ __all__ = [
     "LicenseManager",
     "AuditLogger",
     "EncryptionManager",
-    "DataProtectionManager"
+    "DataProtectionManager",
+    # 深度优化器
+    "DeepSeekOptimizer",
+    "RequestQueue",
+    "CostController",
+    "BatchProcessor",
+    "RetryPolicy",
+    "DegradationStrategy",
+    "Priority",
+    "CostBudget",
+    "OptimizerStats",
 ]
