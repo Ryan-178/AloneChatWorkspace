@@ -3,14 +3,14 @@ requires = ["setuptools>=61.0", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "alonework"
+name = "alonechat"
 version = "0.2.0"
 description = "国产化、终端原生、深度中文优化的AI编程Agent"
 readme = "README.md"
 requires-python = ">=3.10"
 license = {text = "MIT"}
 authors = [
-    {name = "AloneWork Team", email = "aloneworkworkspace@163.com"}
+    {name = "AloneChat Team", email = "alonechatworkspace@163.com"}
 ]
 keywords = ["ai", "agent", "coding", "cli", "chinese", "deepseek"]
 classifiers = [
@@ -33,7 +33,6 @@ dependencies = [
     "PyYAML>=6.0",
     "tomli>=2.0.0",
     "tomli-w>=1.0.0",
-    "prompt_toolkit>=3.0.0",
 ]
 
 [project.optional-dependencies]
@@ -55,17 +54,17 @@ chinese-nlp = [
     "jieba>=0.42.0",
 ]
 agent-framework = [
-    "agent-framework",
+    "agent-framework @ {path = ../agent-framework}",
 ]
 
 [project.scripts]
-alonework = "alonework.cli:main"
+alonechat = "alonechat.cli:main"
 
 [project.urls]
-Homepage = "https://github.com/AloneWorkWorkspace/AloneWork"
-Documentation = "https://github.com/AloneWorkWorkspace/AloneWork#readme"
-Repository = "https://github.com/AloneWorkWorkspace/AloneWork"
-Issues = "https://github.com/AloneWorkWorkspace/AloneWork/issues"
+Homepage = "https://github.com/Ryan-178/AloneChatWorkspace"
+Documentation = "https://github.com/Ryan-178/AloneChatWorkspace#readme"
+Repository = "https://github.com/Ryan-178/AloneChatWorkspace"
+Issues = "https://github.com/Ryan-178/AloneChatWorkspace/issues"
 
 [tool.setuptools.packages.find]
 where = ["src"]
