@@ -1,0 +1,153 @@
+default:
+  max_memory_mb: 512
+  max_cpu_time_seconds: 30
+  max_wall_time_seconds: 60
+  max_output_size: 10485760
+  default_permissions:
+    - read
+    - write
+  allowed_patterns:
+    - "python *"
+    - "python3 *"
+    - "node *"
+    - "ls *"
+    - "cat *"
+    - "echo *"
+
+mtc:
+  max_memory_mb: 256
+  max_cpu_time_seconds: 15
+  max_wall_time_seconds: 30
+  max_output_size: 10485760
+  allowed_permissions:
+    - read
+    - write
+  allowed_commands:
+    - python
+    - python3
+    - ls
+    - cat
+    - echo
+    - head
+    - tail
+    - grep
+    - wc
+    - sort
+    - uniq
+    - cut
+    - tr
+
+code:
+  max_memory_mb: 512
+  max_cpu_time_seconds: 30
+  max_wall_time_seconds: 60
+  max_output_size: 10485760
+  allowed_permissions:
+    - read
+    - write
+    - execute
+  allowed_commands:
+    - python
+    - python3
+    - node
+    - npm
+    - npx
+    - yarn
+    - git
+    - pip
+    - pip3
+    - ls
+    - cat
+    - echo
+    - head
+    - tail
+    - grep
+    - wc
+    - sort
+    - uniq
+    - cut
+    - tr
+    - sed
+    - awk
+    - find
+    - diff
+    - cmp
+    - file
+    - make
+    - cmake
+    - pytest
+    - unittest
+    - ruff
+    - black
+    - mypy
+    - flake8
+
+forbidden_commands:
+  - rm
+  - mv
+  - chmod
+  - chown
+  - sudo
+  - su
+  - wget
+  - curl
+  - nc
+  - netcat
+  - telnet
+  - ssh
+  - scp
+  - bash
+  - sh
+  - zsh
+  - csh
+  - tcsh
+  - fish
+  - mkfs
+  - fdisk
+  - dd
+  - mount
+  - umount
+  - kill
+  - pkill
+  - killall
+  - reboot
+  - shutdown
+  - halt
+  - poweroff
+  - crontab
+  - at
+  - batch
+  - iptables
+  - nft
+  - ufw
+  - useradd
+  - userdel
+  - usermod
+  - groupadd
+  - groupdel
+  - passwd
+  - chpasswd
+  - apt
+  - apt-get
+  - yum
+  - dnf
+  - pacman
+  - brew
+  - docker
+  - kubectl
+  - helm
+
+dangerous_flags:
+  - "-c"
+  - "--command"
+  - "-e"
+  - "--eval"
+  - "-exec"
+  - "--system"
+  - "--shell"
+  - "--sh"
+
+default_env:
+  PATH: "/usr/bin:/bin"
+  HOME: "{project_folder}"
+  TMPDIR: "{project_folder}"

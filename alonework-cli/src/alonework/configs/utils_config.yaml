@@ -1,0 +1,285 @@
+progress:
+  messages:
+    default_status: "生成中"
+    default_description: "处理中"
+    task_summary_title: "任务摘要"
+    total_label: "总计"
+    completed_label: "完成"
+    failed_label: "失败"
+    skipped_label: "跳过"
+  streaming:
+    buffer_display_size: 50
+    spinner_type: "dots"
+
+log:
+  messages:
+    success_symbol: "✓"
+    fail_symbol: "✗"
+  format:
+    file_format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+    logger_name: "alonechat"
+  default_level: "INFO"
+
+commands:
+  prefix: "/"
+  messages:
+    usage_label: "用法"
+    example_label: "示例"
+    command_help_title: "命令帮助"
+    available_commands_title: "可用命令"
+    command_column: "命令"
+    description_column: "描述"
+    alias_column: "别名"
+    not_found_message: "未找到命令"
+  defaults:
+    help:
+      description: "显示帮助信息 / Show help information"
+      aliases:
+        - "h"
+        - "?"
+      usage: "/help [命令名 / command name]"
+      examples:
+        - "/help"
+        - "/help generate"
+    exit:
+      description: "退出程序 / Exit program"
+      aliases:
+        - "quit"
+        - "q"
+      usage: "/exit"
+      examples:
+        - "/exit"
+        - "/quit"
+    clear:
+      description: "清屏 / Clear screen"
+      aliases:
+        - "cls"
+      usage: "/clear"
+      examples:
+        - "/clear"
+    model:
+      description: "切换模型 / Switch model"
+      aliases:
+        - "m"
+      usage: "/model <模型名 / model name>"
+      examples:
+        - "/model deepseek"
+        - "/model ollama"
+    context:
+      description: "查看或设置上下文 / View or set context"
+      aliases:
+        - "ctx"
+      usage: "/context [大小 / size]"
+      examples:
+        - "/context"
+        - "/context 1000000"
+    history:
+      description: "查看命令历史 / View command history"
+      aliases:
+        - "hist"
+      usage: "/history [搜索词 / search term]"
+      examples:
+        - "/history"
+        - "/history generate"
+    save:
+      description: "保存对话 / Save conversation"
+      aliases:
+        - "s"
+      usage: "/save [文件名 / filename]"
+      examples:
+        - "/save"
+        - "/save my_chat.json"
+    load:
+      description: "加载对话 / Load conversation"
+      aliases:
+        - "l"
+      usage: "/load <文件名 / filename>"
+      examples:
+        - "/load my_chat.json"
+    plan:
+      description: "创建执行计划 / Create execution plan (v2.1.72)"
+      aliases: []
+      usage: "/plan [描述 / description]"
+      examples:
+        - "/plan"
+        - "/plan fix auth bug"
+    remote-control:
+      description: "桥接会话到远程 / Bridge session to remote (v2.1.79)"
+      aliases:
+        - "remote"
+      usage: "/remote-control [--name <标题>]"
+      examples:
+        - "/remote-control"
+        - "/remote-control --name MyProject"
+    reload-plugins:
+      description: "重新加载插件无需重启 / Reload plugins without restart (v2.1.69)"
+      aliases:
+        - "reload"
+      usage: "/reload-plugins [name]"
+      examples:
+        - "/reload-plugins"
+        - "/reload-plugins list"
+    debug:
+      description: "排查当前会话故障 / Troubleshoot session (v2.1.30)"
+      aliases: []
+      usage: "/debug [session|config|network]"
+      examples:
+        - "/debug"
+        - "/debug session"
+    keybindings:
+      description: "自定义键盘快捷键 / Custom shortcuts (v2.1.18)"
+      aliases:
+        - "keys"
+        - "shortcuts"
+      usage: "/keybindings [set|reset|export]"
+      examples:
+        - "/keybindings"
+        - "/keybindings set Ctrl+P format"
+    claude-api:
+      description: "通过Claude API构建应用 / Build with Claude API (v2.1.69)"
+      aliases:
+        - "claude"
+      usage: "/claude-api [config|list|test|skill]"
+      examples:
+        - "/claude-api"
+        - "/claude-api config"
+    terminal-setup:
+      description: "终端配置 / Terminal setup (v2.0.74)"
+      aliases:
+        - "terminal"
+      usage: "/terminal-setup [kitty|alacritty|zed|warp|list|detect]"
+      examples:
+        - "/terminal-setup"
+        - "/terminal-setup kitty"
+    todos:
+      description: "待办事项管理 / Todo list management (v1.0.94)"
+      aliases:
+        - "todo"
+      usage: "/todos [add|done|delete|clear|prioritize]"
+      examples:
+        - "/todos"
+        - "/todos add 重构登录模块"
+    export:
+      description: "导出对话以便共享 / Export conversation (v1.0.44)"
+      aliases:
+        - "save"
+      usage: "/export [markdown|json|text|html]"
+      examples:
+        - "/export"
+        - "/export markdown --output chat.md"
+
+history:
+  default_max_size: 100
+  history_dir: ".alonechat"
+  history_file: "history.json"
+
+autocompleter:
+  min_partial_length: 3
+  max_context_size: 100
+  max_suggestions: 10
+  max_matches_per_context: 3
+
+ui:
+  styles:
+    cyan: "cyan"
+    green: "green"
+    red: "red"
+    yellow: "yellow"
+    blue: "blue"
+    dim: "dim"
+    bold: "bold"
+
+# ============================================================
+# CLI增强配置 / CLI Enhancement Configuration
+# ============================================================
+
+# 流式输出配置 / Streaming Output Configuration
+streaming:
+  enabled: true
+  line_buffering: true
+  reasoning_prefix:
+    - "[思考]"
+    - "[reasoning]"
+  default_spinner: "dots"
+
+# 终端通知配置 / Terminal Notification Configuration
+notifications:
+  enabled: true
+  tmux_support: true
+  iterm2_popup: true
+  kitty_popup: true
+  ghostty_popup: true
+  system_notifications: true
+  max_message_length: 200
+
+# 超链接配置 / Hyperlink Configuration
+hyperlinks:
+  enabled: true
+  osc8_support: true
+  file_path_pattern: "(?:[A-Za-z]:\\|/)?(?:[\\w\\-. ]+[\\\\/])+[\\w\\-. ]+\\.\\w+(?::\\d+)?"
+  wrap_file_paths: true
+
+# 图片链接配置 / Image Link Configuration
+images:
+  enabled: true
+  open_in_viewer: true
+  supported_extensions:
+    - ".png"
+    - ".jpg"
+    - ".jpeg"
+    - ".gif"
+    - ".bmp"
+    - ".svg"
+    - ".webp"
+  image_ref_pattern: '\[Image\s*(?:#|No\.)?\s*(\d+)\]'
+
+# 思维块配置 / Thinking Block Configuration
+thinking_block:
+  enabled_by_default: false
+  toggle_key: "ctrl+o"
+  refresh_rate: 10
+  max_lines_display: 50
+  panel_title: "思考过程 / Reasoning Process"
+  panel_border_style: "yellow"
+
+# 状态栏配置 / Status Bar Configuration
+statusline:
+  enabled: true
+  default_format: "AloneChat | {model}"
+  available_variables:
+    - "{model}"
+    - "{tokens}"
+    - "{session}"
+    - "{mode}"
+    - "{cwd}"
+
+# Vim模式配置 / Vim Mode Configuration
+vim:
+  enabled: false
+  default_mode: "normal"
+  enhanced_bindings:
+    - "y"
+    - "p"
+    - "P"
+    - ">>"
+    - "<<"
+    - "J"
+    - ";"
+    - ","
+  undo_stack_size: 100
+
+# 提示建议配置 / Prompt Suggestion Configuration
+suggestions:
+  enabled: true
+  max_suggestions: 5
+  tab_behavior: "accept_and_edit"
+  enter_behavior: "submit_directly"
+  show_hints: true
+  command_autocomplete: true
+
+# IME支持配置 / IME Support Configuration
+ime:
+  enabled: true
+  cursor_tracking: true
+  windows_support: true
+  unix_support: true

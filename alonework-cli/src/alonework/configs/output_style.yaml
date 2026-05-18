@@ -1,0 +1,244 @@
+# 输出样式配置 / Output Style Configuration
+# 版本 / Version: 2.0.32
+# 根据社区反馈，取消弃用输出样式 / Based on community feedback, deprecated styles are restored
+
+# 主题配置 / Theme Configuration
+theme:
+  # 默认主题 / Default theme
+  default: "dark"
+  
+  # 可用主题 / Available themes
+  available:
+    dark:
+      name: "深色主题 / Dark Theme"
+      background: "#1a1a2e"
+      foreground: "#eaeaea"
+      primary: "#4a9eff"
+      secondary: "#6c757d"
+      success: "#28a745"
+      warning: "#ffc107"
+      error: "#dc3545"
+      info: "#17a2b8"
+      muted: "#6c757d"
+    
+    light:
+      name: "浅色主题 / Light Theme"
+      background: "#ffffff"
+      foreground: "#333333"
+      primary: "#0066cc"
+      secondary: "#6c757d"
+      success: "#28a745"
+      warning: "#ffc107"
+      error: "#dc3545"
+      info: "#17a2b8"
+      muted: "#6c757d"
+    
+    monokai:
+      name: "Monokai主题 / Monokai Theme"
+      background: "#272822"
+      foreground: "#f8f8f2"
+      primary: "#66d9ef"
+      secondary: "#75715e"
+      success: "#a6e22e"
+      warning: "#e6db74"
+      error: "#f92672"
+      info: "#ae81ff"
+      muted: "#75715e"
+
+# 输出格式配置 / Output Format Configuration
+output_formats:
+  # 文本格式 / Text format
+  text:
+    enabled: true
+    show_timestamp: false
+    show_token_count: true
+    wrap_lines: true
+    max_line_width: 120
+  
+  # JSON格式 / JSON format
+  json:
+    enabled: true
+    pretty_print: true
+    include_metadata: true
+    include_usage: true
+  
+  # 流式JSON格式 / Stream JSON format
+  stream-json:
+    enabled: true
+    delimiter: "\n"
+    include_metadata: false
+
+# 代码块样式 / Code Block Style
+code_block:
+  # 语法高亮 / Syntax highlighting
+  syntax_highlight: true
+  
+  # 行号显示 / Line numbers
+  show_line_numbers: true
+  
+  # 支持的语言 / Supported languages
+  languages:
+    - python
+    - javascript
+    - typescript
+    - go
+    - rust
+    - java
+    - cpp
+    - c
+    - bash
+    - yaml
+    - json
+    - markdown
+    - html
+    - css
+
+# 进度条样式 / Progress Bar Style
+progress:
+  # 进度条字符 / Progress bar characters
+  filled: "█"
+  empty: "░"
+  
+  # 进度条宽度 / Progress bar width
+  width: 40
+  
+  # 显示百分比 / Show percentage
+  show_percentage: true
+  
+  # 显示时间估算 / Show time estimate
+  show_time_estimate: true
+
+# 表格样式 / Table Style
+table:
+  # 边框样式 / Border style
+  border_style: "rounded"
+  
+  # 显示表头 / Show header
+  show_header: true
+  
+  # 表头样式 / Header style
+  header_style: "bold cyan"
+  
+  # 行样式 / Row style
+  row_style: "default"
+  
+  # 交替行颜色 / Alternating row colors
+  alternate_rows: true
+
+# 消息样式 / Message Style
+message:
+  # 用户消息 / User message
+  user:
+    prefix: "👤"
+    style: "bold green"
+  
+  # 助手消息 / Assistant message
+  assistant:
+    prefix: "🤖"
+    style: "bold blue"
+  
+  # 系统消息 / System message
+  system:
+    prefix: "⚙️"
+    style: "dim"
+  
+  # 错误消息 / Error message
+  error:
+    prefix: "❌"
+    style: "bold red"
+  
+  # 警告消息 / Warning message
+  warning:
+    prefix: "⚠️"
+    style: "bold yellow"
+  
+  # 成功消息 / Success message
+  success:
+    prefix: "✓"
+    style: "bold green"
+  
+  # 信息消息 / Info message
+  info:
+    prefix: "ℹ️"
+    style: "bold cyan"
+
+# 日志级别样式 / Log Level Style
+log_levels:
+  debug:
+    icon: "🔍"
+    style: "dim"
+  info:
+    icon: "ℹ️"
+    style: "default"
+  warning:
+    icon: "⚠️"
+    style: "bold yellow"
+  error:
+    icon: "❌"
+    style: "bold red"
+  critical:
+    icon: "🔥"
+    style: "bold red reverse"
+
+# 动画配置 / Animation Configuration
+animation:
+  # 启用动画 / Enable animation
+  enabled: true
+  
+  # 思考动画 / Thinking animation
+  thinking:
+    frames: ["⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧", "⠇", "⠏"]
+    interval: 80
+  
+  # 加载动画 / Loading animation
+  loading:
+    frames: ["⣷", "⣯", "⣟", "⡀", "⢄", "⢂", "⢁", "⡁", "⡈", "⠔"]
+    interval: 100
+
+# 标签页样式 / Tab Style
+tabs:
+  # 激活标签样式 / Active tab style
+  active_style: "bold white on blue"
+  
+  # 非激活标签样式 / Inactive tab style
+  inactive_style: "dim"
+  
+  # 分隔符 / Separator
+  separator: "│"
+
+# 面板样式 / Panel Style
+panel:
+  # 边框样式 / Border style
+  border_style: "rounded"
+  
+  # 标题样式 / Title style
+  title_style: "bold"
+  
+  # 内边距 / Padding
+  padding: 1
+
+# 弃用样式恢复 / Deprecated Style Restoration
+# 根据社区反馈恢复以下样式 / Based on community feedback, restore the following styles
+deprecated_restored:
+  # 恢复经典进度条 / Restore classic progress bar
+  classic_progress: true
+  
+  # 恢复简单表格 / Restore simple table
+  simple_table: true
+  
+  # 恢复纯文本输出 / Restore plain text output
+  plain_text: true
+  
+  # 恢复无图标消息 / Restore message without icons
+  no_icon_message: true
+
+# 可访问性配置 / Accessibility Configuration
+accessibility:
+  # 高对比度模式 / High contrast mode
+  high_contrast: false
+  
+  # 减少动画 / Reduce motion
+  reduce_motion: false
+  
+  # 屏幕阅读器友好 / Screen reader friendly
+  screen_reader_friendly: false

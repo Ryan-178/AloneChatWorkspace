@@ -1,0 +1,168 @@
+chinese:
+  nlp:
+    segmentation:
+      mode: "accurate"
+      user_dict_enabled: true
+      user_dict_path: "~/.alonechat/user_dict.txt"
+      
+    entity_recognition:
+      types:
+        - type: "function"
+          patterns:
+            - "函数"
+            - "方法"
+            - "function"
+            - "method"
+          color: "cyan"
+        - type: "variable"
+          patterns:
+            - "变量"
+            - "参数"
+            - "variable"
+            - "param"
+          color: "green"
+        - type: "class"
+          patterns:
+            - "类"
+            - "对象"
+            - "class"
+            - "object"
+          color: "yellow"
+        - type: "module"
+          patterns:
+            - "模块"
+            - "包"
+            - "module"
+            - "package"
+          color: "magenta"
+        - type: "file"
+          patterns:
+            - "文件"
+            - "路径"
+            - "file"
+            - "path"
+          color: "blue"
+          
+    semantic_analysis:
+      similarity_threshold: 0.7
+      context_window: 5
+      
+  prompt:
+    templates:
+      requirement_understanding: |
+        请分析以下中文需求，提取关键信息：
+        
+        需求：{requirement}
+        
+        请提供：
+        1. 核心功能描述
+        2. 技术要求
+        3. 约束条件
+        4. 预期输出
+        
+      code_comment: |
+        请为以下代码生成中文注释：
+        
+        语言：{language}
+        代码：
+        ```{language}
+        {code}
+        ```
+        
+        要求：
+        1. 使用规范的中文注释
+        2. 解释关键逻辑
+        3. 标注参数和返回值
+        4. 说明注意事项
+        
+      documentation: |
+        请为以下代码生成中文文档：
+        
+        语言：{language}
+        代码：
+        ```{language}
+        {code}
+        ```
+        
+        要求：
+        1. 功能概述
+        2. 使用方法
+        3. 参数说明
+        4. 返回值说明
+        5. 示例代码
+        6. 注意事项
+        
+  code_style:
+    naming:
+      variable:
+        style: "snake_case"
+        chinese_prefix_enabled: false
+        max_length: 30
+      function:
+        style: "snake_case"
+        verb_prefix:
+          - "get"
+          - "set"
+          - "is"
+          - "has"
+          - "add"
+          - "remove"
+          - "update"
+          - "delete"
+          - "create"
+          - "load"
+          - "save"
+          - "parse"
+          - "format"
+          - "validate"
+          - "process"
+          - "handle"
+        max_length: 40
+      class:
+        style: "PascalCase"
+        suffix:
+          - "Handler"
+          - "Manager"
+          - "Service"
+          - "Controller"
+          - "Model"
+          - "View"
+          - "Helper"
+          - "Utils"
+        max_length: 40
+      constant:
+        style: "UPPER_SNAKE_CASE"
+        max_length: 40
+        
+    comment:
+      file_header: true
+      function_docstring: true
+      class_docstring: true
+      inline_comment_threshold: 10
+      language: "zh-CN"
+      
+    format:
+      indent_size: 4
+      max_line_length: 100
+      blank_lines_between_functions: 2
+      blank_lines_between_classes: 2
+      
+  accuracy:
+    target: 0.92
+    test_cases:
+      - category: "requirement_understanding"
+        weight: 0.3
+      - category: "code_generation"
+        weight: 0.3
+      - category: "comment_generation"
+        weight: 0.2
+      - category: "documentation"
+        weight: 0.2
+
+messages:
+  chinese:
+    entity_extracted: "识别到实体 / Entity extracted"
+    requirement_parsed: "需求解析完成 / Requirement parsed"
+    comment_generated: "注释生成完成 / Comment generated"
+    doc_generated: "文档生成完成 / Documentation generated"
+    style_suggestion: "风格建议 / Style suggestion"

@@ -1,0 +1,143 @@
+AloneChatWorkspace Non-Commercial Open Source License
+Version 1.0
+
+Copyright (c) 2026 AloneChatWorkspace Contributors
+Contact: alonechatworkspace@163.com
+Project: https://github.com/Ryan-178/AloneChatWorkspace
+
+================================================================================
+                              LICENSE TERMS
+================================================================================
+
+GRANT OF LICENSE
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, subject to the following conditions:
+
+================================================================================
+                         CONDITION 1: NON-COMMERCIAL USE
+================================================================================
+
+THE SOFTWARE IS PROVIDED FOR NON-COMMERCIAL USE ONLY.
+
+"Commercial Use" means any use of the Software that is primarily intended for
+or directed toward commercial advantage or monetary compensation. This includes,
+but is not limited to:
+
+  a) Using the Software in a product or service that is sold or licensed for
+     a fee;
+  
+  b) Using the Software to provide paid services or consulting;
+  
+  c) Using the Software in a commercial environment for internal business
+     operations that generate revenue;
+  
+  d) Incorporating the Software into proprietary software that is sold or
+     licensed commercially;
+  
+  e) Using the Software for advertising or marketing purposes that generate
+     revenue.
+
+PERMITTED USES include:
+
+  - Personal use and learning
+  - Academic and educational use
+  - Research purposes
+  - Non-profit organization use
+  - Open-source project contributions
+  - Personal portfolio or demonstration purposes
+
+================================================================================
+                    CONDITION 2: DERIVATIVE WORKS MUST BE OPEN
+================================================================================
+
+IF YOU MODIFY, EXTEND, OR CREATE DERIVATIVE WORKS BASED ON THIS SOFTWARE,
+YOU MUST:
+
+  a) Release all derivative works under this same license or a compatible
+     license that enforces the same conditions (Non-Commercial + Open Source);
+  
+  b) Make the complete source code of your derivative work publicly available;
+  
+  c) Clearly attribute the original work to AloneChatWorkspace;
+  
+  d) Include a copy of this license with your derivative work;
+  
+  e) Document all modifications you have made to the original software.
+
+"Derivative Works" includes but is not limited to:
+
+  - Modified versions of the Software
+  - Software that incorporates or is based on this Software
+  - Translations or adaptations of the Software
+  - Works that combine this Software with other code
+  - Forked versions of the project
+
+================================================================================
+                         CONDITION 3: ATTRIBUTION
+================================================================================
+
+Any use of this Software must include clear and prominent attribution to the
+original authors:
+
+  - The project name: AloneChatWorkspace
+  - The project URL: https://github.com/Ryan-178/AloneChatWorkspace
+  - The original authors and contributors
+
+================================================================================
+                         CONDITION 4: NO WARRANTY
+================================================================================
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+================================================================================
+                         ENFORCEMENT AND VIOLATION
+================================================================================
+
+Any violation of the terms of this license, including but not limited to:
+
+  - Commercial use without explicit written permission from the copyright holders
+  - Failure to open-source derivative works
+  - Removal or modification of license terms in derivative works
+  - Failure to provide proper attribution
+
+shall result in immediate termination of your license to use the Software.
+
+For commercial licensing inquiries or special permissions, please contact:
+Email: alonechatworkspace@163.com
+
+================================================================================
+                         COMPATIBLE LICENSES
+================================================================================
+
+Derivative works may be licensed under the following compatible licenses that
+enforce similar non-commercial and copyleft conditions:
+
+  - GNU Affero General Public License v3.0 (AGPL-3.0) with non-commercial clause
+  - Creative Commons Attribution-NonCommercial-ShareAlike 4.0 (CC BY-NC-SA 4.0)
+  - Any license that enforces both non-commercial use and open-source requirements
+
+================================================================================
+                              SUMMARY
+================================================================================
+
+In simple terms:
+
+  ✓ You CAN use, study, modify, and share this software
+  ✓ You CAN create derivative works for non-commercial purposes
+  ✓ You CAN contribute back to the project
+  
+  ✗ You CANNOT use this software for commercial purposes
+  ✗ You CANNOT create closed-source derivatives
+  ✗ You CANNOT sell or commercially license this software or derivatives
+
+================================================================================

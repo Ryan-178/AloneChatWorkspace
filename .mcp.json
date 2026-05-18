@@ -1,0 +1,19 @@
+{
+    "mcpServers": {
+        "filesystem": {
+            "command": "npx",
+            "args": ["-y", "@modelcontextprotocol/server-filesystem", "."],
+            "description": "文件系统访问 - 项目作用域",
+            "transport": "stdio",
+            "auto_start": true
+        },
+        "project-docs": {
+            "command": "npx",
+            "args": ["-y", "@modelcontextprotocol/server-docs"],
+            "description": "项目文档MCP服务器 - SSE传输示例",
+            "transport": "sse",
+            "url": "http://localhost:3001/mcp",
+            "auto_start": false
+        }
+    }
+}

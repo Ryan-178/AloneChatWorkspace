@@ -1,0 +1,131 @@
+deepseek:
+  api:
+    base_url: "https://api.deepseek.com/v1"
+    timeout: 120
+    max_retries: 3
+    retry_delay: 1
+    
+  model:
+    name: "deepseek-v4-flash"
+    display_name: "DeepSeek V4 Flash"
+    context_window: 1000000
+    max_output_tokens: 8192
+    supports_streaming: true
+    supports_tools: true
+    supports_reasoning: true
+    reasoning_effort: "high"
+    
+  pricing:
+    prompt_per_million: 0.1
+    completion_per_million: 0.4
+    cached_prompt_per_million: 0.01
+    cache_hit_rate: "99.91%"
+    
+  context_caching:
+    enabled: true
+    description: "上下文硬盘缓存技术对所有用户默认开启"
+    hit_rate: "99.91%"
+    rules:
+      - "请求结束位置落盘：每次请求的用户输入结束位置与模型输出结束位置，会产生两个缓存前缀单元"
+      - "公共前缀检测落盘：系统检测到多次请求之间存在公共前缀时，自动落盘"
+      - "固定token间隔落盘：长输入/输出中按间隔截取缓存前缀单元"
+      
+  encryption:
+    enabled: true
+    algorithm: "AES-256-GCM"
+    key_length: 32
+    salt_length: 16
+    nonce_length: 12
+    
+  context:
+    max_tokens: 1000000
+    compression_threshold: 800000
+    compression_ratio: 0.3
+    cache_enabled: true
+    cache_ttl: 3600
+    
+  temperature:
+    default: 0.7
+    code_generation: 0.3
+    code_review: 0.5
+    creative: 0.9
+    reasoning: 0.3
+    
+prompts:
+  system:
+    code_generation: |
+      你是一个专业的代码生成助手。请根据用户需求生成高质量、可维护的代码。
+      
+      要求：
+      1. 代码清晰、结构良好
+      2. 包含必要的类型注解
+      3. 包含错误处理
+      4. 遵循最佳实践
+      5. 使用中文注释
+      
+    code_review: |
+      你是一个专业的代码审查助手。请分析代码并提供改进建议。
+      
+      审查要点：
+      1. 代码质量
+      2. 潜在bug
+      3. 性能问题
+      4. 安全风险
+      5. 可维护性
+      
+    code_explanation: |
+      你是一个专业的代码解释助手。请用清晰易懂的方式解释代码。
+      
+      要求：
+      1. 解释代码功能
+      2. 说明关键逻辑
+      3. 指出潜在问题
+      4. 使用中文回答
+      
+    chinese_optimization: |
+      你是一个深度优化中文理解的AI助手。
+      
+      特点：
+      1. 准确理解中文需求
+      2. 生成符合中文习惯的代码注释
+      3. 提供中文文档
+      4. 支持中文变量命名建议
+      
+  templates:
+    function_generation: |
+      请生成一个函数：
+      
+      名称：{name}
+      功能：{description}
+      参数：{params}
+      返回值：{returns}
+      
+      语言：{language}
+      
+    class_generation: |
+      请生成一个类：
+      
+      名称：{name}
+      功能：{description}
+      属性：{attributes}
+      方法：{methods}
+      
+      语言：{language}
+      
+    test_generation: |
+      请为以下代码生成单元测试：
+      
+      ```{language}
+      {code}
+      ```
+      
+      测试框架：{test_framework}
+      
+messages:
+  deepseek:
+    api_error: "API调用失败 / API call failed"
+    timeout_error: "请求超时 / Request timeout"
+    rate_limit: "请求频率限制 / Rate limit exceeded"
+    context_overflow: "上下文超出限制 / Context overflow"
+    encryption_error: "加密失败 / Encryption failed"
+    decryption_error: "解密失败 / Decryption failed"

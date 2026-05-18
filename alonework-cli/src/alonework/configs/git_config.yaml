@@ -1,0 +1,92 @@
+git:
+  commit:
+    types:
+      - key: "feat"
+        description: "新功能 / New feature"
+        emoji: "✨"
+      - key: "fix"
+        description: "修复bug / Bug fix"
+        emoji: "🐛"
+      - key: "docs"
+        description: "文档更新 / Documentation update"
+        emoji: "📝"
+      - key: "style"
+        description: "代码格式 / Code style"
+        emoji: "💄"
+      - key: "refactor"
+        description: "重构 / Refactoring"
+        emoji: "♻️"
+      - key: "perf"
+        description: "性能优化 / Performance improvement"
+        emoji: "⚡"
+      - key: "test"
+        description: "测试 / Testing"
+        emoji: "✅"
+      - key: "chore"
+        description: "构建/工具 / Build/Tools"
+        emoji: "🔧"
+      - key: "ci"
+        description: "CI/CD"
+        emoji: "👷"
+      - key: "revert"
+        description: "回滚 / Revert"
+        emoji: "⏪"
+    max_subject_length: 72
+    max_body_line_length: 100
+    default_scope: ""
+    
+  branch:
+    prefixes:
+      feature: "feature/"
+      bugfix: "fix/"
+      hotfix: "hotfix/"
+      release: "release/"
+      docs: "docs/"
+      refactor: "refactor/"
+    default_prefix: "feature/"
+    
+  pr:
+    template_sections:
+      - "description"
+      - "changes"
+      - "testing"
+      - "screenshots"
+      - "checklist"
+    default_labels:
+      - "needs-review"
+    title_format: "{type}: {description}"
+    
+  diff:
+    context_lines: 3
+    max_diff_size: 10000
+    ignore_patterns:
+      - "*.lock"
+      - "*.min.js"
+      - "*.min.css"
+      - "node_modules/*"
+      - ".git/*"
+      - "__pycache__/*"
+      - "*.pyc"
+      - ".env"
+      - "*.log"
+      
+  rollback:
+    backup_branch_prefix: "backup/"
+    max_backups: 10
+    
+messages:
+  git:
+    no_changes: "没有检测到变更 / No changes detected"
+    commit_success: "提交成功 / Commit successful"
+    commit_failed: "提交失败 / Commit failed"
+    push_success: "推送成功 / Push successful"
+    push_failed: "推送失败 / Push failed"
+    pr_created: "PR已创建 / PR created"
+    pr_failed: "PR创建失败 / PR creation failed"
+    rollback_success: "回滚成功 / Rollback successful"
+    rollback_failed: "回滚失败 / Rollback failed"
+    no_repo: "不是Git仓库 / Not a git repository"
+    no_remote: "未配置远程仓库 / No remote configured"
+    branch_exists: "分支已存在 / Branch already exists"
+    confirm_commit: "确认提交这些变更？ / Confirm commit these changes?"
+    confirm_rollback: "确认回滚到上一个提交？ / Confirm rollback to previous commit?"

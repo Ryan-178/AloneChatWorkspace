@@ -1,0 +1,77 @@
+code:
+  languages:
+    python:
+      extensions:
+        - ".py"
+      comment_style: "#"
+      docstring_style: '"""'
+      test_framework: "pytest"
+      package_manager: "pip"
+      
+    javascript:
+      extensions:
+        - ".js"
+        - ".mjs"
+      comment_style: "//"
+      docstring_style: "/**"
+      test_framework: "jest"
+      package_manager: "npm"
+      
+    typescript:
+      extensions:
+        - ".ts"
+        - ".tsx"
+      comment_style: "//"
+      docstring_style: "/**"
+      test_framework: "jest"
+      package_manager: "npm"
+      
+    java:
+      extensions:
+        - ".java"
+      comment_style: "//"
+      docstring_style: "/**"
+      test_framework: "junit"
+      package_manager: "maven"
+      
+    go:
+      extensions:
+        - ".go"
+      comment_style: "//"
+      docstring_style: "//"
+      test_framework: "go test"
+      package_manager: "go mod"
+      
+    rust:
+      extensions:
+        - ".rs"
+      comment_style: "//"
+      docstring_style: "///"
+      test_framework: "cargo test"
+      package_manager: "cargo"
+      
+  generation:
+    max_retries: 3
+    temperature: 0.3
+    include_tests: true
+    include_docs: true
+    
+  analysis:
+    max_file_size: 100000
+    include_dependencies: true
+    include_complexity: true
+    
+  refactoring:
+    safe_mode: true
+    backup_enabled: true
+    validate_after: true
+
+messages:
+  code:
+    generation_success: "代码生成成功 / Code generation successful"
+    generation_failed: "代码生成失败 / Code generation failed"
+    analysis_success: "代码分析完成 / Code analysis completed"
+    refactoring_success: "重构完成 / Refactoring completed"
+    refactoring_failed: "重构失败 / Refactoring failed"
+    unsupported_language: "不支持的语言 / Unsupported language"
+    file_not_found: "文件未找到 / File not found"
