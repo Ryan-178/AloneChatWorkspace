@@ -80,12 +80,31 @@ class AgentMode(str, Enum):
     CODE = "code"
 
 
+class InteractionMode(str, Enum):
+    """
+    交互模式枚举 - Interaction Mode Enum
+    定义用户交互的模式，控制工具执行的审批流程
+    Defines user interaction modes, controlling tool execution approval flow
+    
+    PLAN: 只读探索模式，无工具执行 / Read-only exploration mode, no tool execution
+    AGENT: 默认交互模式，工具执行需审批 / Default interaction mode, tool execution requires approval
+    YOLO: 自动批准模式，信任工作区 / Auto-approve mode, trust workspace
+    """
+    PLAN = "plan"
+    AGENT = "agent"
+    YOLO = "yolo"
+
+
 class ModeConfig(BaseModel):
     """
     模式配置 - Mode Configuration
     配置特定模式的参数和限制
     Configures parameters and restrictions for a specific mode
     """
+    mode: InteractionMode = Field(default=InteractionMode.AGENT, description="交互模式 / Interaction mode")
+    auto_approve_tools: bool = Field(default=False, description="是否自动批准工具执行 / Whether to auto-approve tool execution")
+    require_confirmation: List[str] = Field(default_factory=lambda: ["shell", "file_write", "file_delete"], description="需要确认的工具列表 / Tools requiring confirmation")
+    max_auto_approve_cost: float = Field(default=1.0, description="最大自动批准成本 / Maximum cost for auto-approval")
     allowed_tools: List[str] = Field(default_factory=list, description="该模式允许的工具名称列表 / List of allowed tool names for this mode")
     sandbox_config: Optional[Dict[str, Any]] = Field(default=None, description="代码执行的沙箱配置 / Sandbox configuration for code execution")
     system_prompt: Optional[str] = Field(default=None, description="该模式的系统提示词 / System prompt for this mode")

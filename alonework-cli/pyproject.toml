@@ -54,7 +54,7 @@ chinese-nlp = [
     "jieba>=0.42.0",
 ]
 agent-framework = [
-    "agent-framework @ {path = ../agent-framework}",
+    "agent-framework @ file:../agent-framework",
 ]
 
 [project.scripts]

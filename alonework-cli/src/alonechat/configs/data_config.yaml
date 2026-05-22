@@ -1,0 +1,27 @@
+# 数据配置 / Data Configuration
+# 核心策略：数据收集而非直接训练 / Core strategy: Data collection instead of direct training
+
+data:
+  collection:
+    enabled: true
+    record_trajectories: true
+    record_steps: true
+    auto_save: false
+    
+  storage:
+    type: "sqlite"
+    path: "${HOME}/.alonework/data/trajectories.db"
+    
+  export:
+    default_format: "jsonl"
+    output_dir: "${HOME}/.alonework/exports"
+    high_quality_threshold: 0.5
+    
+  quality:
+    min_quality_threshold: 0.5
+    optimal_step_count: 10
+    weights:
+      task_completion: 0.4
+      efficiency: 0.2
+      reward: 0.2
+      error_rate: 0.2

@@ -51,6 +51,7 @@ class SlashCommandExecutor:
             terminal_setup_command,
             todos_command,
             export_command,
+            handle_mode_command,
         )
         from alonechat.slash.commands.agents import agents_command
         from alonechat.slash.commands.permissions import permissions_command
@@ -59,6 +60,15 @@ class SlashCommandExecutor:
         from alonechat.slash.commands.vim import vim_command
         from alonechat.slash.commands.init import init_slash_command
         from alonechat.slash.commands.statusline import statusline_command
+        
+        def mode_command_wrapper(args: list, obj: dict, session_manager=None, registry=None) -> str:
+            """Mode command wrapper to adapt to slash command signature"""
+            mode_manager = obj.get("mode_manager")
+            if mode_manager is None:
+                from alonechat.modes import CliModeManager
+                mode_manager = CliModeManager()
+                obj["mode_manager"] = mode_manager
+            return handle_mode_command(args, mode_manager)
         
         builtin_commands = [
             SlashCommand(
@@ -138,6 +148,13 @@ class SlashCommandExecutor:
                 description="切换模型 / Switch model",
                 handler=model_command,
                 aliases=["m"],
+                category="settings",
+            ),
+            SlashCommand(
+                name="mode",
+                description="切换交互模式 (plan/agent/yolo) / Switch interaction mode",
+                handler=mode_command_wrapper,
+                aliases=["mo"],
                 category="settings",
             ),
             SlashCommand(

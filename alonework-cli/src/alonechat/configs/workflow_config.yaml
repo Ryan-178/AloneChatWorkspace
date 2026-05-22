@@ -1,0 +1,109 @@
+# 工作流编排配置
+# Workflow Orchestration Configuration
+
+workflow_engine:
+  max_parallel: 10
+  default_timeout: 3600
+  checkpoint_enabled: true
+  checkpoint_interval: 60
+  trajectory_recording: true
+
+executor:
+  max_retries: 3
+  retry_delay: 1.0
+  retry_backoff: 2.0
+  timeout: 3600
+  parallel_limit: 10
+  stop_on_error: false
+  enable_reflection: true
+
+planner:
+  max_depth: 5
+  max_steps: 20
+  default_strategy: adaptive
+  complexity_threshold: 3.0
+
+strategies:
+  sequential:
+    description: 顺序执行策略
+    use_cases:
+      - 有依赖关系的任务
+      - 需要按顺序完成的流程
+  
+  parallel:
+    description: 并行执行策略
+    use_cases:
+      - 独立任务
+      - 可同时执行的步骤
+    max_concurrency: 10
+  
+  hierarchical:
+    description: 层次分解策略
+    use_cases:
+      - 复杂任务分解
+      - 多层级处理
+    max_depth: 5
+  
+  conditional:
+    description: 条件分支策略
+    use_cases:
+      - 需要判断的流程
+      - 多路径选择
+  
+  adaptive:
+    description: 自适应策略
+    use_cases:
+      - 自动选择最优策略
+      - 根据任务特征调整
+
+nodes:
+  action:
+    default_timeout: 300
+    default_retries: 3
+  
+  condition:
+    cache_results: true
+  
+  parallel:
+    default_concurrency: 10
+    fail_fast: false
+    collect_results: true
+  
+  loop:
+    max_iterations: 1000
+    default_delay: 0
+    break_on_error: false
+
+presets:
+  code_review_workflow:
+    name: 代码审查工作流
+    description: 自动化代码审查流程
+    steps:
+      - analyze
+      - review
+      - report
+  
+  data_pipeline:
+    name: 数据处理管道
+    description: ETL数据处理流程
+    steps:
+      - extract
+      - transform
+      - load
+      - validate
+  
+  research_workflow:
+    name: 研究分析工作流
+    description: 信息收集与分析流程
+    steps:
+      - search
+      - collect
+      - analyze
+      - summarize
+
+logging:
+  level: INFO
+  format: "[%(asctime)s] [%(levelname)s] [%(name)s] %(message)s"
+  file: logs/workflow.log
+  max_size: 10MB
+  backup_count: 5

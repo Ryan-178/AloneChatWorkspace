@@ -41,6 +41,7 @@ from alonechat.slash.commands.claude_api import claude_api_command
 from alonechat.slash.commands.terminal_setup import terminal_setup_command
 from alonechat.slash.commands.todos import todos_command
 from alonechat.slash.commands.export import export_command
+from alonechat.slash.commands.mode import handle_mode_command
 
 __all__ = [
     "clear_command",
@@ -66,4 +67,5 @@ __all__ = [
     "terminal_setup_command",
     "todos_command",
     "export_command",
+    "handle_mode_command",
 ]

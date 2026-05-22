@@ -1,0 +1,71 @@
+# Agent配置 / Agent Configuration
+# 核心理念：从"静态推理"到"为了行动而思考" / Core philosophy: From static reasoning to thinking for action
+
+supervisor:
+  model: deepseek-v4-flash
+  max_workers: 4
+  planning_depth: 3
+  reflection_enabled: true
+  timeout: 600
+
+workers:
+  code_agent:
+    enabled: true
+    tools:
+      - file_ops
+      - code_execute
+      - git
+      - linter
+    languages:
+      - python
+      - javascript
+      - typescript
+      - go
+      - rust
+      
+  data_agent:
+    enabled: true
+    tools:
+      - database
+      - spreadsheet
+      - api
+      - file_ops
+    datasources:
+      - local
+      - remote
+      
+  research_agent:
+    enabled: true
+    tools:
+      - web_search
+      - document_read
+      - api
+      - file_ops
+    search_tools:
+      - web
+      - local
+      - documentation
+      
+  test_agent:
+    enabled: true
+    tools:
+      - pytest
+      - coverage
+      - code_execute
+      - file_ops
+    frameworks:
+      - pytest
+      - unittest
+      - jest
+
+communication:
+  message_bus_enabled: true
+  max_queue_size: 1000
+  broadcast_enabled: true
+  shared_memory_enabled: true
+
+reflection:
+  enabled: true
+  max_history: 100
+  reflection_depth: 3
+  pattern_learning: true

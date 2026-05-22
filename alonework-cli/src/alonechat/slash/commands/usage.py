@@ -7,7 +7,7 @@
 from rich.console import Console
 from rich.table import Table
 from rich.panel import Panel
-from rich.progress import BarColumn, Progress, TextColumn, Percentage
+from rich.progress import BarColumn, Progress, TextColumn
 
 console = Console()
 

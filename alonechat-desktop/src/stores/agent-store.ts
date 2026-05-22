@@ -2,10 +2,12 @@ import { create } from 'zustand';
 import { sessionApi, modeApi } from '@/lib/api';
 import { gatewayWs } from '@/lib/websocket';
 import { generateId } from '@/lib/utils';
-import type { AgentMessage, AgentSession, AgentMode } from '@/types';
+import type { AgentMessage, AgentSession, AgentMode, InteractionMode, InteractionModeConfig } from '@/types';
 
 interface AgentStore {
   mode: AgentMode;
+  interactionMode: InteractionMode;
+  interactionModeConfig: InteractionModeConfig | null;
   session: AgentSession | null;
   sessions: AgentSession[];
   messages: AgentMessage[];
@@ -19,6 +21,8 @@ interface AgentStore {
   selectSession: (session: AgentSession) => void;
   deleteSession: (sessionId: string) => Promise<void>;
   switchMode: (mode: AgentMode) => Promise<void>;
+  switchInteractionMode: (mode: InteractionMode) => Promise<void>;
+  cycleInteractionMode: () => void;
   sendMessage: (content: string) => void;
   addMessage: (message: Omit<AgentMessage, 'id' | 'created_at' | 'session_id'>) => void;
   clearMessages: () => void;
@@ -26,8 +30,20 @@ interface AgentStore {
   disconnect: () => void;
 }
 
+const defaultInteractionModeConfig: InteractionModeConfig = {
+  mode: 'agent',
+  auto_approve_tools: false,
+  require_confirmation: ['shell', 'file_write', 'file_delete'],
+  allowed_tools: [],
+  description: '默认交互模式，工具执行需审批 / Default interaction mode, tool execution requires approval',
+  icon: '🤖',
+  color: 'green',
+};
+
 export const useAgentStore = create<AgentStore>((set, get) => ({
   mode: 'MTC',
+  interactionMode: 'agent',
+  interactionModeConfig: defaultInteractionModeConfig,
   session: null,
   sessions: [],
   messages: [],
@@ -47,8 +63,8 @@ export const useAgentStore = create<AgentStore>((set, get) => ({
   },
 
   createSession: async (title?: string) => {
-    const { mode } = get();
-    const session = await sessionApi.create({ title, mode });
+    const { mode, interactionMode } = get();
+    const session = await sessionApi.create({ title, mode, interaction_mode: interactionMode });
     set((state) => ({
       sessions: [session, ...state.sessions],
       session,
@@ -58,7 +74,12 @@ export const useAgentStore = create<AgentStore>((set, get) => ({
   },
 
   selectSession: (session: AgentSession) => {
-    set({ session, messages: [], mode: session.mode });
+    set({ 
+      session, 
+      messages: [], 
+      mode: session.mode,
+      interactionMode: session.interaction_mode || 'agent',
+    });
   },
 
   deleteSession: async (sessionId: string) => {
@@ -78,8 +99,57 @@ export const useAgentStore = create<AgentStore>((set, get) => ({
     }
   },
 
+  switchInteractionMode: async (mode: InteractionMode) => {
+    const modeConfigs: Record<InteractionMode, InteractionModeConfig> = {
+      plan: {
+        mode: 'plan',
+        auto_approve_tools: false,
+        require_confirmation: [],
+        allowed_tools: ['read', 'search', 'list', 'file_read', 'file_search'],
+        description: '只读探索模式，无工具执行 / Read-only exploration mode, no tool execution',
+        icon: '🔍',
+        color: 'blue',
+      },
+      agent: {
+        mode: 'agent',
+        auto_approve_tools: false,
+        require_confirmation: ['shell', 'file_write', 'file_delete', 'file_edit'],
+        allowed_tools: [],
+        description: '默认交互模式，工具执行需审批 / Default interaction mode, tool execution requires approval',
+        icon: '🤖',
+        color: 'green',
+      },
+      yolo: {
+        mode: 'yolo',
+        auto_approve_tools: true,
+        require_confirmation: [],
+        allowed_tools: [],
+        description: '自动批准模式，信任工作区 / Auto-approve mode, trust workspace',
+        icon: '🚀',
+        color: 'yellow',
+      },
+    };
+
+    try {
+      set({ 
+        interactionMode: mode,
+        interactionModeConfig: modeConfigs[mode],
+      });
+    } catch (error) {
+      set({ error: error instanceof Error ? error.message : 'Failed to switch interaction mode' });
+    }
+  },
+
+  cycleInteractionMode: () => {
+    const { interactionMode, switchInteractionMode } = get();
+    const modeOrder: InteractionMode[] = ['plan', 'agent', 'yolo'];
+    const currentIndex = modeOrder.indexOf(interactionMode);
+    const nextIndex = (currentIndex + 1) % modeOrder.length;
+    switchInteractionMode(modeOrder[nextIndex]);
+  },
+
   sendMessage: (content: string) => {
-    const { session, mode } = get();
+    const { session, mode, interactionMode } = get();
     if (!session) return;
 
     get().addMessage({
@@ -92,6 +162,7 @@ export const useAgentStore = create<AgentStore>((set, get) => ({
       type: 'message',
       session_id: session.id,
       mode,
+      interaction_mode: interactionMode,
       body: content,
     });
 

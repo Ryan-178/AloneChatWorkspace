@@ -33,7 +33,7 @@ from rich.text import Text
 from rich.markdown import Markdown
 
 from alonechat import __version__
-from alonechat.commands import init, chat, generate, test, commit
+from alonechat.commands import init, chat, generate, test, commit, data, workflow, env
 from alonechat.config import ConfigManager
 from alonechat.session import SessionManager
 
@@ -198,6 +198,7 @@ def setup_cli_enhancements(
 @click.option("--no-stream", is_flag=True, help="禁用逐行流式输出 / Disable line-by-line streaming (v2.1.78)")
 @click.option("--show-thinking", is_flag=True, help="启用Ctrl+O实时显示思维块 / Enable Ctrl+O live thinking display (v2.1.0)")
 @click.option("--no-ime", is_flag=True, help="禁用IME输入法支持 / Disable IME input support (v2.0.68)")
+@click.option("--mode", "interaction_mode", type=click.Choice(["plan", "agent", "yolo"]), default="agent", help="交互模式 (plan/agent/yolo) / Interaction mode (v0.3.0)")
 @click.argument("query", required=False)
 @click.pass_context
 def main(
@@ -220,6 +221,7 @@ def main(
     no_stream: bool,
     show_thinking: bool,
     no_ime: bool,
+    interaction_mode: str,
     query: str | None,
 ) -> None:
     """
@@ -242,6 +244,32 @@ def main(
     $ alonechat --name "我的会话"  # 设置会话名称 / Set session name
     $ alonechat --agent model=deepseek-v3  # 覆盖代理设置 / Override agent
     $ alonechat --no-stream   # 禁用流式输出 / Disable streaming (v2.1.78)
+
+    \b
+    数据管理 / Data Management:
+    $ alonechat data collect           # 收集交互数据 / Collect interaction data
+    $ alonechat data list              # 列出已收集数据 / List collected data
+    $ alonechat data export            # 导出训练数据 / Export training data
+    $ alonechat data quality           # 评估数据质量 / Evaluate data quality
+    $ alonechat data stats             # 数据统计 / Data statistics
+    $ alonechat data clean             # 清理数据 / Clean up data
+
+    \b
+    工作流编排 / Workflow Orchestration:
+    $ alonechat workflow list          # 列出工作流 / List workflows
+    $ alonechat workflow create        # 创建工作流 / Create workflow
+    $ alonechat workflow run <id>      # 执行工作流 / Execute workflow
+    $ alonechat workflow plan "task"   # 规划任务 / Plan task
+    $ alonechat workflow delete <id>   # 删除工作流 / Delete workflow
+
+    \b
+    环境管理 / Environment Management:
+    $ alonechat env status             # 查看环境状态 / View environment status
+    $ alonechat env reset              # 重置环境 / Reset environment
+    $ alonechat env checkpoint         # 创建检查点 / Create checkpoint
+    $ alonechat env restore <name>     # 恢复检查点 / Restore checkpoint
+    $ alonechat env sandbox            # 沙箱管理 / Sandbox management
+    $ alonechat env tree               # 显示状态树 / Display state tree
 
     \b
     CLI 增强 / CLI Enhancements:
@@ -267,6 +295,11 @@ def main(
     ctx.obj["no_stream"] = no_stream
     ctx.obj["show_thinking"] = show_thinking
     ctx.obj["no_ime"] = no_ime
+    
+    from alonechat.modes import CliModeManager, InteractionMode
+    mode_manager = CliModeManager(verbose=verbose)
+    mode_manager.set_mode(InteractionMode(interaction_mode))
+    ctx.obj["mode_manager"] = mode_manager
 
     if verbose:
         console.print(f"[dim]AloneChat v{__version__}[/dim]")
@@ -288,6 +321,8 @@ def main(
             console.print(f"[dim]流式输出已禁用 / Streaming disabled[/dim]")
         if no_ime:
             console.print(f"[dim]IME支持已禁用 / IME support disabled[/dim]")
+        if interaction_mode != "agent":
+            console.print(f"[dim]交互模式 / Interaction mode: {interaction_mode}[/dim]")
 
     cli_enhancements_manager = setup_cli_enhancements(
         worktree_dir=worktree_dir,
@@ -364,6 +399,9 @@ main.add_command(chat.chat_command, name="chat")
 main.add_command(generate.generate_command, name="generate")
 main.add_command(test.test_command, name="test")
 main.add_command(commit.commit_command, name="commit")
+main.add_command(data.data_commands, name="data")
+main.add_command(workflow.workflow_commands, name="workflow")
+main.add_command(env.env_commands, name="env")
 
 from alonechat.mcp.cli import mcp_command
 main.add_command(mcp_command, name="mcp")

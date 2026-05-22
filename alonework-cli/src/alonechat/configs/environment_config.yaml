@@ -1,0 +1,31 @@
+# 环境配置 / Environment Configuration
+# 核心理念：从"静态推理"到"为了行动而思考" / Core philosophy: From static reasoning to thinking for action
+
+environment:
+  type: action
+  
+  sandbox:
+    enabled: true
+    timeout: 300
+    memory_limit: "1GB"
+    allowed_paths:
+      - "${HOME}/projects"
+      - "${PWD}"
+    blocked_commands:
+      - "rm -rf /"
+      - "sudo"
+      - "chmod 777"
+      - "mkfs"
+      
+  feedback:
+    reward_weights:
+      task_completion: 1.0
+      efficiency: 0.3
+      code_quality: 0.5
+      collaboration: 0.2
+      
+  state:
+    checkpoint_enabled: true
+    checkpoint_interval: 60
+    persistence: "sqlite"
+    max_history_size: 10000
