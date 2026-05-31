@@ -51,8 +51,8 @@ async def test_test_generator():
     """测试测试生成功能"""
     print("\n=== 测试测试生成 ===")
     
-    from agent_framework.services.test_generator import TestGenerator
-    from agent_framework.llm import LiteLLMProvider
+    from alonechat.services.test_generator import TestGenerator
+    from alonechat.llm import LiteLLMProvider
     
     # 初始化
     llm = LiteLLMProvider(model="deepseek-chat")
@@ -106,7 +106,7 @@ async def test_rag_pipeline():
     """测试RAG功能"""
     print("\n=== 测试RAG功能 ===")
     
-    from agent_framework.rag import RAGPipeline
+    from alonechat.rag import RAGPipeline
     
     pipeline = RAGPipeline()
     
@@ -125,8 +125,8 @@ async def test_file_generators():
     """测试文件生成功能"""
     print("\n=== 测试文件生成 ===")
     
-    from agent_framework.services.file_generators import FileGeneratorService
-    from agent_framework.llm import LiteLLMProvider
+    from alonechat.services.file_generators import FileGeneratorService
+    from alonechat.llm import LiteLLMProvider
     
     # 初始化
     llm = LiteLLMProvider(model="deepseek-chat")

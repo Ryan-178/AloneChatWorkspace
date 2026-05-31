@@ -100,7 +100,7 @@ def skills_command(args: list, obj: dict, session_manager, registry, **kwargs) -
         - local: .alonechat/skills/ 目录 / Local skills directory
         - custom_command: .alonechat/commands/ 目录 / Custom commands
     """
-    af_skills = _load_agent_framework_skills()
+    af_skills = _load_alonechat_skills()
     local_skills = _load_local_skills()
     custom_cmds = _load_custom_commands()
 
