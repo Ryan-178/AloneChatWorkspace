@@ -1,4 +1,4 @@
-"""
+﻿"""
 会话管理器 - Session Manager
 
 管理会话的生命周期，使用SQLite存储
@@ -12,8 +12,8 @@ from typing import Any, Dict, List, Optional
 
 from rich.console import Console
 
-from agent_framework.storage import SQLiteSessionStorage, SessionData
-from agent_framework.core.types import InteractionMode
+from alonechat.storage import SQLiteSessionStorage, SessionData
+from alonechat.core.types import InteractionMode
 
 
 console = Console()

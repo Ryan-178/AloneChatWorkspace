@@ -1,4 +1,4 @@
-"""
+﻿"""
 Agent 基类模块 - Base Agent Module
 定义Agent的核心抽象基类和基础数据结构
 Defines the core abstract base class and basic data structures for Agents

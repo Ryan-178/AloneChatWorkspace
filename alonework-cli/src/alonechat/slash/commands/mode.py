@@ -1,4 +1,4 @@
-"""
+﻿"""
 /mode 斜杠命令 - /mode Slash Command
 
 切换交互模式 / Switch interaction mode
@@ -15,7 +15,7 @@ from rich.console import Console
 from rich.panel import Panel
 from rich.table import Table
 
-from agent_framework.core.types import InteractionMode
+from alonechat.core.types import InteractionMode
 
 
 console = Console()

@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "alonework-cli"
-version = "0.2.3"
+version = "0.3.0"
 description = "国产化、终端原生、深度中文优化的AI编程Agent"
 readme = "README.md"
 requires-python = ">=3.10"
@@ -35,6 +35,27 @@ dependencies = [
     "tomli-w>=1.0.0",
     "aiosqlite>=0.20.0",
     "prompt_toolkit>=3.0.40",
+    "litellm>=1.40.0",
+    "pydantic-settings>=2.1.0",
+    "chromadb>=0.4.22",
+    "openai>=1.6.0",
+    "tiktoken>=0.5.0",
+    "aiofiles>=23.2.0",
+    "unstructured>=0.12.0",
+    "pdfminer.six>=20221105",
+    "markdown>=3.5.0",
+    "beautifulsoup4>=4.12.0",
+    "tenacity>=8.2.0",
+    "networkx>=3.2.0",
+    "PyJWT>=2.8.0",
+    "email-validator>=2.1.0",
+    "pdfplumber>=0.9.0",
+    "python-docx>=0.8.11",
+    "openpyxl>=3.1.2",
+    "python-pptx>=0.6.21",
+    "pandas>=2.0.0",
+    "tabulate>=0.9.0",
+    "Pillow>=10.0.0",
 ]
 
 [project.optional-dependencies]
@@ -55,8 +76,13 @@ rag = [
 chinese-nlp = [
     "jieba>=0.42.0",
 ]
-agent-framework = [
-    "agent-framework @ file:../agent-framework",
+gateway = [
+    "fastapi>=0.109.0",
+    "uvicorn>=0.27.0",
+    "websockets>=12.0",
+]
+codex = [
+    "codex-sdk-python>=0.1.0",
 ]
 
 [project.scripts]

@@ -167,6 +167,159 @@ commands:
       examples:
         - "/export"
         - "/export markdown --output chat.md"
+    copy:
+      description: "复制最后响应到剪贴板 / Copy last response to clipboard"
+      aliases:
+        - "cp"
+      usage: "/copy [N]"
+      examples:
+        - "/copy"
+        - "/copy 2"
+    diff:
+      description: "查看未提交的更改 / View uncommitted changes"
+      aliases:
+        - "d"
+      usage: "/diff [--staged|--turn]"
+      examples:
+        - "/diff"
+        - "/diff --staged"
+    effort:
+      description: "设置模型努力级别 / Set effort level"
+      aliases:
+        - "ef"
+      usage: "/effort [low|medium|high|max|auto]"
+      examples:
+        - "/effort"
+        - "/effort high"
+    files:
+      description: "列出当前上下文中的文件 / List files in context"
+      aliases:
+        - "f"
+      usage: "/files [add|remove|list] [path]"
+      examples:
+        - "/files"
+        - "/files add src/main.py"
+    hooks:
+      description: "查看工具事件钩子配置 / View hook configurations"
+      aliases:
+        - "hk"
+      usage: "/hooks [list|test|reset]"
+      examples:
+        - "/hooks"
+        - "/hooks list"
+    memory:
+      description: "编辑记忆文件 / Edit memory files"
+      aliases:
+        - "mem"
+      usage: "/memory [show|edit|add|clear] [content]"
+      examples:
+        - "/memory"
+        - "/memory add 记住使用中文回复"
+    rename:
+      description: "重命名当前会话 / Rename current session"
+      aliases:
+        - "rn"
+      usage: "/rename [new_name]"
+      examples:
+        - "/rename 我的项目会话"
+    resume:
+      description: "恢复之前的会话 / Resume previous session"
+      aliases:
+        - "res"
+      usage: "/resume [session_id|title]"
+      examples:
+        - "/resume"
+        - "/resume abc123"
+    session:
+      description: "会话管理 / Session management"
+      aliases:
+        - "ses"
+      usage: "/session [list|info|delete|export]"
+      examples:
+        - "/session"
+        - "/session list"
+    skills:
+      description: "管理技能 / Manage skills"
+      aliases:
+        - "sk"
+      usage: "/skills [list|install|remove|reload]"
+      examples:
+        - "/skills"
+        - "/skills list"
+    tasks:
+      description: "管理后台任务 / Manage background tasks"
+      aliases:
+        - "t"
+      usage: "/tasks [list|status|stop|clean]"
+      examples:
+        - "/tasks"
+        - "/tasks list"
+    tag:
+      description: "管理会话标签 / Manage session tags"
+      aliases: []
+      usage: "/tag [add|remove|list] [tag_name]"
+      examples:
+        - "/tag"
+        - "/tag add feature"
+    theme:
+      description: "切换主题 / Switch theme"
+      aliases: []
+      usage: "/theme [dark|light|monokai|list]"
+      examples:
+        - "/theme"
+        - "/theme dark"
+    color:
+      description: "设置代理颜色 / Set agent color"
+      aliases: []
+      usage: "/color [set|reset|list] [color]"
+      examples:
+        - "/color"
+        - "/color set cyan"
+    feedback:
+      description: "发送反馈 / Send feedback"
+      aliases:
+        - "fb"
+      usage: "/feedback [message]"
+      examples:
+        - "/feedback 挺好用的！"
+    fast:
+      description: "切换快速模式 / Toggle fast mode"
+      aliases: []
+      usage: "/fast [on|off|status]"
+      examples:
+        - "/fast"
+        - "/fast on"
+    output-style:
+      description: "设置输出样式 / Set output style"
+      aliases:
+        - "os"
+      usage: "/output-style [dark|light|monokai|compact|verbose]"
+      examples:
+        - "/output-style"
+        - "/output-style dark"
+    share:
+      description: "分享会话 / Share session"
+      aliases: []
+      usage: "/share [link|file|clipboard]"
+      examples:
+        - "/share"
+        - "/share file"
+    stickers:
+      description: "趣味贴纸 / Fun stickers"
+      aliases:
+        - "sticker"
+      usage: "/stickers [list|random|send] [name]"
+      examples:
+        - "/stickers"
+        - "/stickers random"
+    upgrade:
+      description: "升级AloneWork CLI / Upgrade AloneWork CLI"
+      aliases:
+        - "update"
+      usage: "/upgrade [check|install|changelog]"
+      examples:
+        - "/upgrade"
+        - "/upgrade check"
 
 history:
   default_max_size: 100

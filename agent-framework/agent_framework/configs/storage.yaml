@@ -1,0 +1,80 @@
+# 会话存储配置 - Session Storage Configuration
+# 定义会话存储的配置参数 / Defines session storage configuration parameters
+
+# 存储类型 - Storage type
+# 可选值: sqlite, json / Available values: sqlite, json
+storage:
+  type: sqlite
+  
+  # SQLite配置 - SQLite configuration
+  sqlite:
+    path: "~/.alonechat/data/sessions.db"
+    
+    # 连接池配置 - Connection pool configuration
+    pool:
+      max_connections: 5
+      timeout: 30
+    
+    # 性能优化 - Performance optimization
+    pragmas:
+      journal_mode: "WAL"  # Write-Ahead Logging
+      synchronous: "NORMAL"
+      cache_size: -64000  # 64MB cache
+      foreign_keys: "ON"
+      temp_store: "MEMORY"
+
+# 备份配置 - Backup configuration
+backup:
+  enabled: true
+  interval: 3600  # 备份间隔(秒) / Backup interval in seconds
+  max_backups: 10  # 最大备份数量 / Maximum backup count
+  path: "~/.alonechat/backups"
+  
+  # 自动备份触发条件 - Auto backup triggers
+  triggers:
+    on_session_count: 50  # 每50个会话自动备份 / Auto backup every 50 sessions
+    on_message_count: 500  # 每500条消息自动备份 / Auto backup every 500 messages
+
+# 迁移配置 - Migration configuration
+migration:
+  from_json: true  # 是否从JSON迁移 / Whether to migrate from JSON
+  keep_json_backup: true  # 是否保留JSON备份 / Whether to keep JSON backup
+  json_dir: "~/.alonechat/sessions"  # JSON文件目录 / JSON file directory
+  
+  # 迁移验证 - Migration validation
+  validate: true  # 迁移后验证 / Validate after migration
+  dry_run: false  # 模拟运行 / Dry run
+
+# 会话清理配置 - Session cleanup configuration
+cleanup:
+  enabled: true
+  
+  # 自动归档 - Auto archive
+  archive:
+    enabled: true
+    after_days: 30  # 30天后自动归档 / Auto archive after 30 days
+    exclude_pinned: true  # 排除置顶会话 / Exclude pinned sessions
+  
+  # 自动删除 - Auto delete
+  delete:
+    enabled: false
+    after_days: 90  # 90天后自动删除 / Auto delete after 90 days
+    only_archived: true  # 仅删除已归档 / Only delete archived
+
+# 会话限制 - Session limits
+limits:
+  max_sessions: 1000  # 最大会话数 / Maximum sessions
+  max_messages_per_session: 10000  # 每会话最大消息数 / Max messages per session
+  max_message_length: 100000  # 最大消息长度 / Max message length
+
+# 索引配置 - Index configuration
+indexes:
+  enabled: true
+  auto_reindex: false  # 自动重建索引 / Auto reindex
+  reindex_interval: 86400  # 重建索引间隔(秒) / Reindex interval in seconds
+
+# 加密配置 - Encryption configuration
+encryption:
+  enabled: false
+  algorithm: "AES-256-GCM"
+  key_file: "~/.alonechat/.storage_key"

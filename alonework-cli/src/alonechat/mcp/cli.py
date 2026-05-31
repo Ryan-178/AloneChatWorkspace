@@ -1,4 +1,4 @@
-"""
+﻿"""
 MCP CLI命令 / MCP CLI Commands
 
 提供MCP相关的命令行接口 / Provides MCP-related CLI interface
@@ -270,7 +270,7 @@ def mcp_resources(name: str | None) -> None:
 @mcp_command.command("project")
 def mcp_project() -> None:
     """管理项目作用域MCP配置 / Manage project-scoped MCP config"""
-    from agent_framework.deepseek_optimization.mcp_marketplace.config import discover_project_mcp_json, load_project_mcp_json
+    from alonechat.deepseek_optimization.mcp_marketplace.config import discover_project_mcp_json, load_project_mcp_json
 
     path = discover_project_mcp_json()
 

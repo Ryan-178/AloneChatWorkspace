@@ -39,7 +39,7 @@ class CLILSPIntegration:
         """
         self._root_path = root_path
         try:
-            from agent_framework.lsp import LSPManager
+            from alonechat.lsp import LSPManager
 
             config_path = str(
                 Path(__file__).parent.parent.parent.parent
@@ -53,7 +53,7 @@ class CLILSPIntegration:
             self._manager.add_diagnostics_handler(self._on_diagnostics)
             return True
         except ImportError:
-            logger.warning("agent_framework.lsp not available")
+            logger.warning("alonechat.lsp not available")
             return False
         except Exception as e:
             logger.error(f"Failed to initialize LSP: {e}")

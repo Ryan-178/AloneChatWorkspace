@@ -31,8 +31,8 @@ console = Console()
 def _get_codex_bridge(working_dir: str = ".", mode: str = "code"):
     """获取 CodexBridge 实例"""
     try:
-        from agent_framework.code.codex_bridge import CodexBridge, CodexBridgeConfig, CodexProvider
-        from agent_framework.core.types import AgentMode
+        from alonechat.code.codex_bridge import CodexBridge, CodexBridgeConfig, CodexProvider
+        from alonechat.core.types import AgentMode
 
         config = CodexBridgeConfig(
             provider=CodexProvider.DEEPSEEK,
@@ -41,15 +41,15 @@ def _get_codex_bridge(working_dir: str = ".", mode: str = "code"):
         )
         return CodexBridge(config)
     except ImportError as e:
-        console.print(f"[red]无法导入 agent-framework: {e}[/red]")
-        console.print("[dim]请确保 agent-framework 已安装: pip install -e agent-framework[/dim]")
+        console.print(f"[red]无法导入 alonechat: {e}[/red]")
+        console.print("[dim]请确保 alonechat 已安装: pip install -e alonechat[/dim]")
         return None
 
 
 def _get_dual_mode_manager():
     """获取 DualModeManager 实例"""
     try:
-        from agent_framework.core.dual_mode_manager import DualModeManager
+        from alonechat.core.dual_mode_manager import DualModeManager
         return DualModeManager.get_instance()
     except ImportError:
         return None
@@ -210,7 +210,7 @@ def mode_command(obj: dict, mode_name: str, session: str):
         alonechat codex mode work
         alonechat codex mode auto
     """
-    from agent_framework.core.types import AgentMode
+    from alonechat.core.types import AgentMode
 
     manager = _get_dual_mode_manager()
     if not manager:
@@ -283,7 +283,7 @@ def tools_command(obj: dict):
 
     显示 Codex 引擎支持的所有工具。
     """
-    from agent_framework.code.code_engine import TOOL_DEFINITIONS
+    from alonechat.code.code_engine import TOOL_DEFINITIONS
 
     table = Table(title="可用工具")
     table.add_column("工具名", style="cyan")
@@ -313,7 +313,7 @@ def shell_command(obj: dict, command: tuple, cwd: str, timeout: int):
         alonechat codex shell python --version
         alonechat codex shell git status --cwd ./myproject
     """
-    from agent_framework.code.shell_tool import ShellTool, ShellConfig
+    from alonechat.code.shell_tool import ShellTool, ShellConfig
 
     cmd_str = " ".join(command)
     console.print(f"[dim]$ {cmd_str}[/dim]")
@@ -349,7 +349,7 @@ def patch_command(obj: dict, patch_file: str, cwd: str, dry_run: bool):
         alonechat codex patch changes.diff
         alonechat codex patch changes.diff --dry-run
     """
-    from agent_framework.code.apply_patch import ApplyPatchTool
+    from alonechat.code.apply_patch import ApplyPatchTool
 
     patch_text = Path(patch_file).read_text(encoding="utf-8")
     patcher = ApplyPatchTool(workdir=os.path.abspath(cwd), dry_run=dry_run)

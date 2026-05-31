@@ -1,4 +1,4 @@
-"""
+﻿"""
 双模式管理器 - Dual Mode Manager
 
 管理 MTC (More Than Coding) 和 CODE 两种 Agent 模式的切换和协同。
@@ -180,8 +180,8 @@ class DualModeManager:
         return agent
 
     def _create_mtc_agent(self, config: ModeConfig, llm=None, **kwargs) -> Any:
-        from alonechat.framework_agent.mtc_agent import MTCAgent
-        from alonechat.tools.framework_registry import ToolRegistry
+        from alonechat.agent.mtc_agent import MTCAgent
+        from alonechat.tools.registry import ToolRegistry
         tool_registry = kwargs.get("tool_registry") or ToolRegistry()
         return MTCAgent(
             llm=llm,
@@ -193,8 +193,8 @@ class DualModeManager:
         )
 
     def _create_code_agent(self, config: ModeConfig, llm=None, **kwargs) -> Any:
-        from alonechat.framework_agent.code_agent import CodeAgent
-        from alonechat.tools.framework_registry import ToolRegistry
+        from alonechat.agent.code_agent import CodeAgent
+        from alonechat.tools.registry import ToolRegistry
         tool_registry = kwargs.get("tool_registry") or ToolRegistry()
         agent = CodeAgent(
             llm=llm,

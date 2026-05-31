@@ -1,5 +1,5 @@
 """
-集成测试示例 - 演示如何使用alonechat CLI调用agent-framework
+集成测试示例 - 演示如何使用alonechat CLI调用alonechat
 """
 
 import asyncio
@@ -10,8 +10,8 @@ async def test_task_planner():
     """测试任务规划功能"""
     print("\n=== 测试任务规划 ===")
     
-    from agent_framework.services.task_planner import TaskPlanner
-    from agent_framework.llm import LiteLLMProvider
+    from alonechat.services.task_planner import TaskPlanner
+    from alonechat.llm import LiteLLMProvider
     
     # 初始化
     llm = LiteLLMProvider(model="deepseek-chat")
@@ -32,7 +32,7 @@ async def test_file_processor():
     """测试文件处理功能"""
     print("\n=== 测试文件处理 ===")
     
-    from agent_framework.services.file_processors import get_processor
+    from alonechat.services.file_processors import get_processor
     
     # 测试不同文件类型
     test_files = [
@@ -74,8 +74,8 @@ async def test_error_fixer():
     """测试错误修复功能"""
     print("\n=== 测试错误修复 ===")
     
-    from agent_framework.services.error_fixer import ErrorFixer
-    from agent_framework.llm import LiteLLMProvider
+    from alonechat.services.error_fixer import ErrorFixer
+    from alonechat.llm import LiteLLMProvider
     
     # 初始化
     llm = LiteLLMProvider(model="deepseek-chat")
@@ -92,7 +92,7 @@ async def test_skills_registry():
     """测试技能注册表"""
     print("\n=== 测试技能注册表 ===")
     
-    from agent_framework.tools.skills_registry import SkillsRegistry
+    from alonechat.tools.skills_registry import SkillsRegistry
     
     registry = SkillsRegistry()
     skills = registry.list_skills()

@@ -22,8 +22,8 @@ console = Console()
 def get_llm():
     """获取LLM实例"""
     try:
-        from agent_framework.llm import LiteLLMProvider
-        from agent_framework.config import config
+        from alonechat.llm import LiteLLMProvider
+        from alonechat.config import config
         
         llm_config = config.llm
         return LiteLLMProvider(
@@ -33,7 +33,7 @@ def get_llm():
         )
     except Exception as e:
         console.print(f"[red]无法初始化LLM: {e}[/red]")
-        console.print("[dim]请确保配置正确且agent-framework已安装[/dim]")
+        console.print("[dim]请确保配置正确且alonechat已安装[/dim]")
         raise
 
 
@@ -49,7 +49,7 @@ def test_command(obj: dict, source_file: str | None, output_dir: str, framework:
     """
     自动测试
     
-    使用agent-framework的TestGenerator生成和执行测试
+    使用alonechat的TestGenerator生成和执行测试
     
     示例：
     $ alonechat test --file my_code.py
@@ -84,7 +84,7 @@ def test_command(obj: dict, source_file: str | None, output_dir: str, framework:
     ))
     
     try:
-        from agent_framework.services.test_generator import TestGenerator
+        from alonechat.services.test_generator import TestGenerator
         
         llm = get_llm()
         generator = TestGenerator(llm=llm)
@@ -161,7 +161,7 @@ def test_command(obj: dict, source_file: str | None, output_dir: str, framework:
                     console.print(f"  • {failure.get('test')}: {failure.get('message')}")
         
     except ImportError:
-        console.print("[red]错误: agent-framework未安装[/red]")
-        console.print("[dim]请确保agent-framework在Python路径中[/dim]")
+        console.print("[red]错误: alonechat未安装[/red]")
+        console.print("[dim]请确保alonechat在Python路径中[/dim]")
     except Exception as e:
         console.print(f"[red]错误: {e}[/red]")

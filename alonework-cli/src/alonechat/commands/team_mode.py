@@ -1,4 +1,4 @@
-"""
+﻿"""
 CLI Team模式 / CLI Team Mode
 
 提供多Agent协作的CLI交互
@@ -38,7 +38,7 @@ class CLITeamMode:
         初始化Team模式 / Initialize Team mode
         """
         try:
-            from agent_framework.orchestration.team_engine import TeamEngine
+            from alonechat.orchestration.team_engine import TeamEngine
 
             self._team_engine = TeamEngine()
             await self._team_engine.initialize()

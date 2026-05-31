@@ -1,0 +1,106 @@
+clarification:
+  max_questions: 3
+  vague_keywords:
+    - "帮我"
+    - "弄一下"
+    - "处理"
+    - "做个"
+    - "写个"
+    - "分析"
+    - "整理"
+    - "优化"
+    - "改进"
+    - "修改"
+    - "看看"
+    - "检查"
+    - "弄好"
+  specific_indicators:
+    min_length_for_specific: 50
+    keywords:
+      - "具体"
+      - "详细"
+      - "格式"
+      - "要求"
+    min_de_count: 2
+  vague_indicators:
+    max_length_for_vague: 20
+    max_word_count: 8
+
+question_templates:
+  document:
+    - id: "output_format"
+      question: "您希望输出什么格式的文档？"
+      type: "choice"
+      options:
+        - "Markdown"
+        - "Word文档"
+        - "PDF"
+        - "Excel表格"
+        - "PPT演示文稿"
+      required: true
+    - id: "detail_level"
+      question: "您需要多详细的内容？"
+      type: "choice"
+      options:
+        - "简要概述（1-2页）"
+        - "标准详细（3-5页）"
+        - "非常详细（5页以上）"
+      required: true
+
+  data:
+    - id: "data_source"
+      question: "数据来源是什么？"
+      type: "text"
+      required: true
+    - id: "analysis_type"
+      question: "您需要什么类型的分析？"
+      type: "choice"
+      options:
+        - "描述性统计"
+        - "趋势分析"
+        - "对比分析"
+        - "相关性分析"
+      required: true
+
+  research:
+    - id: "research_scope"
+      question: "调研范围是什么？"
+      type: "text"
+      required: true
+    - id: "output_requirements"
+      question: "调研报告需要包含哪些内容？"
+      type: "choice"
+      options:
+        - "基本信息"
+        - "详细分析"
+        - "对比评估"
+        - "建议方案"
+      required: true
+
+  default:
+    - id: "goal"
+      question: "您希望达到什么目标？"
+      type: "text"
+      required: true
+    - id: "constraints"
+      question: "有什么特殊要求或限制吗？"
+      type: "text"
+      required: false
+
+  common:
+    - id: "target_audience"
+      question: "这份产出的目标读者是谁？（可选）"
+      type: "text"
+      required: false
+
+task_keywords:
+  document:
+    - "文档"
+    - "报告"
+    - "写"
+  data:
+    - "数据"
+    - "分析"
+  research:
+    - "调研"
+    - "搜索"

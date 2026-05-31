@@ -45,12 +45,12 @@ async def _list_models_async(
     verbose: bool,
 ) -> None:
     try:
-        from agent_framework.llm.model_registry import get_model_registry
+        from alonechat.llm.model_registry import get_model_registry
 
         registry = get_model_registry()
 
         if provider:
-            from agent_framework.llm.model_registry import ModelProvider
+            from alonechat.llm.model_registry import ModelProvider
             try:
                 provider_enum = ModelProvider(provider)
                 models_list = registry.list_by_provider(provider_enum)
@@ -58,7 +58,7 @@ async def _list_models_async(
                 console.print(f"[red]未知提供商: {provider}[/red]")
                 return
         elif capability:
-            from agent_framework.llm.model_registry import ModelCapability
+            from alonechat.llm.model_registry import ModelCapability
             try:
                 cap_enum = ModelCapability(capability)
                 models_list = registry.list_by_capability(cap_enum)
@@ -100,7 +100,7 @@ async def _list_models_async(
         console.print(table)
 
     except ImportError:
-        console.print("[red]agent_framework 不可用[/red]")
+        console.print("[red]alonechat 不可用[/red]")
 
 
 @cli.command()

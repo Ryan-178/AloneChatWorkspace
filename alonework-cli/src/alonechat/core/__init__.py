@@ -1,4 +1,4 @@
-"""
+﻿"""
 Agent Framework Core Module
 Agent框架核心模块
 
@@ -20,16 +20,75 @@ from alonechat.core.types import (
     TaskStatus,
     TaskPriority,
 )
-from alonechat.core.base_agent import BaseAgent, AgentResult, AgentEvent
+from alonechat.core.base_agent import BaseAgent
 from alonechat.core.base_llm import BaseLLM
 from alonechat.core.base_memory import BaseMemory
 from alonechat.core.base_tool import BaseTool, ToolDef, ToolResult as ToolResultDef
 from alonechat.core.mode_manager import ModeManager
 from alonechat.core.dual_mode_manager import DualModeManager, ModeConfig as AgentModeConfig, ModeSwitchReason
-from alonechat.core.orchestrator import Orchestrator, WorkflowGraph, WorkflowNode
-from alonechat.core.agent_bus import AgentBus, AgentMessage
+
+# 新架构组件 / New architecture components
+from alonechat.core.store import Store, create_store, StoreManager, get_store_manager
+from alonechat.core.app_state import (
+    AppState,
+    PermissionMode,
+    TaskStatus as AppStateTaskStatus,
+    ToolPermissionContext,
+    MCPState,
+    TaskState,
+    SessionState,
+    ModelState,
+    NotificationState,
+    get_default_app_state,
+    update_app_state
+)
+from alonechat.core.tool import (
+    Tool,
+    ToolResult as NewToolResult,
+    ValidationResult,
+    PermissionResult,
+    ToolProgress,
+    ToolUseContext,
+    Tools,
+    find_tool_by_name,
+    filter_enabled_tools
+)
+from alonechat.core.tool_builder import (
+    build_tool,
+    create_tool,
+    ToolRegistry,
+    get_tool_registry
+)
+from alonechat.core.command import (
+    Command,
+    CommandType,
+    CommandSource,
+    CommandResult,
+    CommandContext,
+    Commands,
+    find_command_by_name,
+    filter_enabled_commands,
+    format_command_help
+)
+from alonechat.core.command_registry import (
+    CommandRegistry,
+    get_command_registry,
+    execute_command
+)
+from alonechat.core.query_engine import (
+    QueryEngine,
+    SimpleQueryEngine,
+    ModelClient,
+    ToolExecutor,
+    QueryParams,
+    QueryResult,
+    StreamEvent,
+    Message as QueryMessage,
+    MessageRole as QueryMessageRole
+)
 
 __all__ = [
+    # 原有导出 / Original exports
     "AgentState",
     "MessageRole",
     "Message",
@@ -43,8 +102,6 @@ __all__ = [
     "TaskStatus",
     "TaskPriority",
     "BaseAgent",
-    "AgentResult",
-    "AgentEvent",
     "BaseLLM",
     "BaseMemory",
     "BaseTool",
@@ -54,9 +111,61 @@ __all__ = [
     "DualModeManager",
     "AgentModeConfig",
     "ModeSwitchReason",
-    "Orchestrator",
-    "WorkflowGraph",
-    "WorkflowNode",
-    "AgentBus",
-    "AgentMessage",
+    
+    # 状态管理 / State Management
+    "Store",
+    "create_store",
+    "StoreManager",
+    "get_store_manager",
+    "AppState",
+    "PermissionMode",
+    "AppStateTaskStatus",
+    "ToolPermissionContext",
+    "MCPState",
+    "TaskState",
+    "SessionState",
+    "ModelState",
+    "NotificationState",
+    "get_default_app_state",
+    "update_app_state",
+    
+    # 工具系统 / Tool System
+    "Tool",
+    "NewToolResult",
+    "ValidationResult",
+    "PermissionResult",
+    "ToolProgress",
+    "ToolUseContext",
+    "Tools",
+    "find_tool_by_name",
+    "filter_enabled_tools",
+    "build_tool",
+    "create_tool",
+    "ToolRegistry",
+    "get_tool_registry",
+    
+    # 命令系统 / Command System
+    "Command",
+    "CommandType",
+    "CommandSource",
+    "CommandResult",
+    "CommandContext",
+    "Commands",
+    "find_command_by_name",
+    "filter_enabled_commands",
+    "format_command_help",
+    "CommandRegistry",
+    "get_command_registry",
+    "execute_command",
+    
+    # 查询引擎 / Query Engine
+    "QueryEngine",
+    "SimpleQueryEngine",
+    "ModelClient",
+    "ToolExecutor",
+    "QueryParams",
+    "QueryResult",
+    "StreamEvent",
+    "QueryMessage",
+    "QueryMessageRole",
 ]

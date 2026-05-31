@@ -1,405 +1,563 @@
 """
-配置管理模块 - Configuration Management
-支持多环境配置、配置热加载、配置验证
+框架配置桥接层 / Framework Configuration Bridge
+
+桥接 alonechat 与 alonework-cli 的配置系统
+Bridges alonechat and alonework-cli configuration systems
+
+对齐 claude-code-claude 的架构模式：
+- 集中式状态管理 / Centralized state management
+- 多源设置加载 / Multi-source settings loading
+- 命令类型系统 / Command type system
+- 工具权限上下文 / Tool permission context
+
+版本 / Version: 2.1.80
 """
+
 import os
-import json
 import yaml
-import asyncio
-from typing import Any, Dict, List, Optional, Callable
-from dataclasses import dataclass, field
 from pathlib import Path
-from pydantic import BaseModel, Field, field_validator
-from pydantic_settings import BaseSettings, SettingsConfigDict
-from threading import Lock
-from watchfiles import awatch
+from dataclasses import dataclass, field
+from typing import Any, Optional
+
+# ============================================================
+# 路径常量 / Path Constants
+# ============================================================
+
+PROJECT_DIR = Path.cwd()
+ALONECHAT_DIR = PROJECT_DIR / ".alonechat"
+CONFIG_DIR = ALONECHAT_DIR
+SESSIONS_DIR = ALONECHAT_DIR / "sessions"
+MEMORY_DIR = ALONECHAT_DIR / "memory"
+SKILLS_DIR = ALONECHAT_DIR / "skills"
+COMMANDS_DIR = ALONECHAT_DIR / "commands"
+HOOKS_DIR = ALONECHAT_DIR / "hooks"
+SHARED_DIR = ALONECHAT_DIR / "shared"
+FEEDBACK_DIR = ALONECHAT_DIR / "feedback"
+TAGS_DIR = ALONECHAT_DIR / "tags"
+
+# 框架配置源路径 / Framework config source paths
+FRAMEWORK_CONFIGS_DIR = Path(__file__).parent / "configs"
+USER_CONFIG_FILE = ALONECHAT_DIR / "config.yaml"
+PROJECT_CONFIG_FILE = PROJECT_DIR / ".aloneworkrc"
+GLOBAL_CONFIG_FILE = Path.home() / ".alonechat" / "config.yaml"
 
 
-class LLMSettings(BaseModel):
-    """LLM配置"""
-    provider: str = Field(default="openai", description="LLM提供商")
-    model: str = Field(default="gpt-4o", description="模型名称")
-    api_key: Optional[str] = Field(default=None, description="API密钥")
-    api_base: Optional[str] = Field(default=None, description="API基础URL")
-    temperature: float = Field(default=0.7, ge=0.0, le=2.0, description="温度参数")
-    max_tokens: int = Field(default=4096, ge=1, description="最大token数")
-    timeout: float = Field(default=30.0, description="请求超时秒数")
-    max_retries: int = Field(default=3, ge=0, description="最大重试次数")
-    retry_delay: float = Field(default=1.0, description="重试延迟秒数")
+# ============================================================
+# 设置源 / Setting Sources (对齐 claude-code-claude 的 SettingSource)
+# ============================================================
+
+@dataclass(frozen=True)
+class SettingSource:
+    """
+    设置来源定义 / Setting source definition
+
+    对齐 claude-code-claude 的 SettingSource 类型
+    Aligns with claude-code-claude's SettingSource type
+    """
+    name: str
+    priority: int
+    path: Optional[Path] = None
+    description: str = ""
 
 
-class MemorySettings(BaseModel):
-    """内存配置"""
-    window_size: int = Field(default=10, description="对话窗口大小")
-    vector_db_type: str = Field(default="chromadb", description="向量数据库类型")
-    vector_db_path: str = Field(default="./data/chroma", description="向量数据库路径")
-    embedding_model: str = Field(default="text-embedding-ada-002", description="嵌入模型")
-    enable_persistence: bool = Field(default=True, description="是否启用持久化")
+SETTING_SOURCES = {
+    "framework": SettingSource(
+        name="framework",
+        priority=0,
+        path=FRAMEWORK_CONFIGS_DIR,
+        description="框架默认配置 / Framework default configs",
+    ),
+    "project": SettingSource(
+        name="project",
+        priority=10,
+        path=PROJECT_CONFIG_FILE,
+        description="项目级配置 / Project-level config",
+    ),
+    "user": SettingSource(
+        name="user",
+        priority=20,
+        path=USER_CONFIG_FILE,
+        description="用户级配置 / User-level config",
+    ),
+    "global": SettingSource(
+        name="global",
+        priority=30,
+        path=GLOBAL_CONFIG_FILE,
+        description="全局配置 / Global config",
+    ),
+    "env": SettingSource(
+        name="env",
+        priority=40,
+        description="环境变量 / Environment variables",
+    ),
+    "cli": SettingSource(
+        name="cli",
+        priority=50,
+        description="CLI参数 / CLI arguments",
+    ),
+}
 
 
-class GatewaySettings(BaseModel):
-    """网关配置"""
-    host: str = Field(default="0.0.0.0", description="监听地址")
-    port: int = Field(default=8787, ge=1, le=65535, description="监听端口")
-    session_timeout: int = Field(default=3600, description="会话超时秒数")
-    max_sessions: int = Field(default=1000, description="最大会话数")
-    enable_cors: bool = Field(default=True, description="是否启用CORS")
-    cors_origins: List[str] = Field(
-        default_factory=lambda: os.getenv("CORS_ORIGINS", "http://localhost:3000,http://localhost:5173").split(","),
-        description="CORS源"
-    )
-    enable_health_check: bool = Field(default=True, description="是否启用健康检查")
-    health_check_path: str = Field(default="/health", description="健康检查路径")
+# ============================================================
+# 命令类型 / Command Types (对齐 claude-code-claude)
+# ============================================================
+
+class CommandType:
+    """
+    命令类型枚举 / Command type enumeration
+
+    对齐 claude-code-claude 的三种命令类型：
+    - local: 本地执行命令，返回文本结果
+    - prompt: 提示命令，展开为发送给模型的文本
+    - interactive: 交互式命令，需要用户输入
+
+    Aligns with claude-code-claude's command types:
+    - local: Local execution, returns text result
+    - prompt: Prompt command, expands to text sent to model
+    - interactive: Interactive command, requires user input
+    """
+    LOCAL = "local"
+    PROMPT = "prompt"
+    INTERACTIVE = "interactive"
 
 
-class LoggingSettings(BaseModel):
-    """日志配置"""
-    level: str = Field(default="INFO", description="日志级别")
-    format: str = Field(default="colored", description="日志格式: colored, json")
-    file_path: Optional[str] = Field(default=None, description="日志文件路径")
-    max_file_size: int = Field(default=10485760, description="最大文件大小(字节)")
-    backup_count: int = Field(default=5, description="备份文件数")
+# ============================================================
+# 命令基类 / Command Base (对齐 claude-code-claude 的 CommandBase)
+# ============================================================
+
+@dataclass
+class CommandBase:
+    """
+    命令基类 / Command base class
+
+    对齐 claude-code-claude 的 CommandBase 类型定义
+    Aligns with claude-code-claude's CommandBase type definition
+    """
+    name: str
+    description: str
+    type: str = CommandType.LOCAL
+    aliases: list[str] = field(default_factory=list)
+    category: str = "general"
+    usage: str = ""
+    examples: list[str] = field(default_factory=list)
+    is_hidden: bool = False
+    is_enabled: bool = True
+    source: str = "builtin"
+    version: str = ""
+    when_to_use: str = ""
+    argument_hint: str = ""
+    disable_model_invocation: bool = False
+    user_invocable: bool = True
+    immediate: bool = False
+    is_sensitive: bool = False
 
 
-class MetricsSettings(BaseModel):
-    """指标配置"""
-    enabled: bool = Field(default=True, description="是否启用指标收集")
-    export_interval: int = Field(default=60, description="导出间隔秒数")
-    export_path: Optional[str] = Field(default=None, description="导出文件路径")
-    enable_prometheus: bool = Field(default=False, description="是否启用Prometheus导出")
-    prometheus_port: int = Field(default=9090, description="Prometheus端口")
+@dataclass
+class LocalCommand(CommandBase):
+    """
+    本地执行命令 / Local execution command
+
+    对齐 claude-code-claude 的 LocalCommand 类型
+    """
+    type: str = CommandType.LOCAL
+    supports_non_interactive: bool = True
+    handler: Any = None
 
 
-class TracingSettings(BaseModel):
-    """追踪配置"""
-    enabled: bool = Field(default=True, description="是否启用追踪")
-    sample_rate: float = Field(default=1.0, ge=0.0, le=1.0, description="采样率")
-    export_path: Optional[str] = Field(default=None, description="导出文件路径")
-    enable_zipkin: bool = Field(default=False, description="是否启用Zipkin导出")
-    zipkin_endpoint: Optional[str] = Field(default=None, description="Zipkin端点")
+@dataclass
+class PromptCommand(CommandBase):
+    """
+    提示命令 / Prompt command
+
+    对齐 claude-code-claude 的 PromptCommand 类型
+    展开为发送给模型的内容
+    """
+    type: str = CommandType.PROMPT
+    progress_message: str = ""
+    content_length: int = 0
+    allowed_tools: list[str] = field(default_factory=list)
+    model: str = ""
+    context: str = "inline"
+    effort: str = ""
+    paths: list[str] = field(default_factory=list)
+    get_prompt_for_command: Any = None
 
 
-class MTCSettings(BaseModel):
-    """MTC模式配置 - More Than Coding模式，面向非开发用户"""
-    sandbox_root: str = Field(default="./workspace/mtc", description="MTC模式沙箱根目录")
-    allowed_file_extensions: List[str] = Field(
-        default_factory=lambda: [".txt", ".md", ".pdf", ".docx", ".xlsx", ".pptx", ".csv", ".json", ".html"],
-        description="允许处理的文件扩展名"
-    )
-    max_file_size: int = Field(default=10485760, description="最大文件大小(字节)，默认10MB")
-    intent_clarification_enabled: bool = Field(default=True, description="是否启用意图澄清")
-    max_clarification_questions: int = Field(default=3, ge=1, le=5, description="最大追问问题数")
-    allowed_commands: List[str] = Field(default_factory=list, description="允许执行的命令白名单")
-    output_formats: List[str] = Field(
-        default_factory=lambda: ["markdown", "pdf", "pptx", "xlsx", "docx"],
-        description="支持的输出格式"
-    )
+@dataclass
+class InteractiveCommand(CommandBase):
+    """
+    交互式命令 / Interactive command
+
+    对齐 claude-code-claude 的 LocalJSXCommand 类型
+    需要用户交互的命令
+    """
+    type: str = CommandType.INTERACTIVE
+    handler: Any = None
 
 
-class CODESettings(BaseModel):
-    """CODE模式配置 - 面向开发者用户"""
-    sandbox_root: str = Field(default="./workspace/code", description="CODE模式沙箱根目录")
-    allowed_commands: List[str] = Field(
-        default_factory=lambda: ["git", "npm", "yarn", "pip", "pip3", "node", "npx", "python", "python3", "make", "docker"],
-        description="允许执行的命令白名单"
-    )
-    enable_linting: bool = Field(default=True, description="是否启用代码检查")
-    enable_testing: bool = Field(default=True, description="是否启用测试生成")
-    enable_browser_automation: bool = Field(default=False, description="是否启用浏览器自动化")
-    max_file_size: int = Field(default=52428800, description="最大文件大小(字节)，默认50MB")
-    enable_search_agent: bool = Field(default=True, description="是否启用Search子Agent")
-    enable_plan_mode: bool = Field(default=True, description="是否启用Plan Mode")
-    max_context_tokens: int = Field(default=128000, description="最大上下文token数")
+# ============================================================
+# 工具权限上下文 / Tool Permission Context (对齐 claude-code-claude)
+# ============================================================
+
+@dataclass
+class ToolPermissionRule:
+    """
+    工具权限规则 / Tool permission rule
+
+    对齐 claude-code-claude 的工具权限规则
+    """
+    tool_name: str
+    pattern: str = ""
+    action: str = "allow"
+    source: str = "user"
+    reason: str = ""
 
 
-class ModeSettings(BaseModel):
-    """模式管理配置"""
-    default_mode: str = Field(default="MTC", description="默认模式")
-    allow_mode_switch: bool = Field(default=True, description="是否允许模式切换")
-    mtc_config: MTCSettings = Field(default_factory=MTCSettings, description="MTC模式配置")
-    code_config: CODESettings = Field(default_factory=CODESettings, description="CODE模式配置")
+@dataclass
+class ToolPermissionContext:
+    """
+    工具权限上下文 / Tool permission context
+
+    对齐 claude-code-claude 的 ToolPermissionContext
+    """
+    rules: list[ToolPermissionRule] = field(default_factory=list)
+    mode: str = "default"
+    bypass_permissions: bool = False
+
+    def is_tool_allowed(self, tool_name: str) -> Optional[bool]:
+        """
+        检查工具是否被允许 / Check if tool is allowed
+
+        Returns:
+            True: 允许 / Allowed
+            False: 拒绝 / Denied
+            None: 需要提示 / Needs prompt
+        """
+        if self.bypass_permissions:
+            return True
+
+        for rule in reversed(self.rules):
+            if self._match_rule(rule, tool_name):
+                return rule.action == "allow"
+
+        return None
+
+    def _match_rule(self, rule: ToolPermissionRule, tool_name: str) -> bool:
+        """匹配规则 / Match rule"""
+        if rule.pattern:
+            if rule.pattern.endswith("*"):
+                return tool_name.startswith(rule.pattern[:-1])
+            return tool_name == rule.pattern
+        return tool_name == rule.tool_name
 
 
-class AgentConfig(BaseSettings):
-    """主配置类"""
-    model_config = SettingsConfigDict(
-        env_file=".env",
-        env_file_encoding="utf-8",
-        env_nested_delimiter="__",
-        extra="allow"
-    )
-    
-    # 各子配置
-    llm: LLMSettings = Field(default_factory=LLMSettings)
-    memory: MemorySettings = Field(default_factory=MemorySettings)
-    gateway: GatewaySettings = Field(default_factory=GatewaySettings)
-    logging: LoggingSettings = Field(default_factory=LoggingSettings)
-    metrics: MetricsSettings = Field(default_factory=MetricsSettings)
-    tracing: TracingSettings = Field(default_factory=TracingSettings)
-    mode: ModeSettings = Field(default_factory=ModeSettings, description="模式管理配置")
-    
-    # 全局配置
-    debug: bool = Field(default=False, description="调试模式")
-    data_dir: str = Field(default="./data", description="数据目录")
-    
-    @field_validator('data_dir')
-    @classmethod
-    def ensure_data_dir(cls, v: str) -> str:
-        Path(v).mkdir(parents=True, exist_ok=True)
-        return v
-    
-    @classmethod
-    def from_yaml(cls, path: str) -> "AgentConfig":
-        """从YAML文件加载配置"""
-        file_path = Path(path)
-        if not file_path.exists():
-            return cls()
-        with open(file_path, "r", encoding="utf-8") as f:
-            data = yaml.safe_load(f) or {}
-        return cls(**data)
-    
-    @classmethod
-    def from_json(cls, path: str) -> "AgentConfig":
-        """从JSON文件加载配置"""
-        file_path = Path(path)
-        if not file_path.exists():
-            return cls()
-        with open(file_path, "r", encoding="utf-8") as f:
-            data = json.load(f) or {}
-        return cls(**data)
-    
-    @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> "AgentConfig":
-        """从字典加载配置"""
-        return cls(**data)
-    
-    def to_dict(self) -> Dict[str, Any]:
-        """转换为字典"""
-        return self.model_dump()
-    
-    def to_yaml(self, path: str):
-        """保存为YAML文件"""
-        Path(path).parent.mkdir(parents=True, exist_ok=True)
-        with open(path, "w", encoding="utf-8") as f:
-            yaml.dump(self.to_dict(), f, allow_unicode=True, default_flow_style=False)
-    
-    def to_json(self, path: str):
-        """保存为JSON文件"""
-        Path(path).parent.mkdir(parents=True, exist_ok=True)
-        with open(path, "w", encoding="utf-8") as f:
-            json.dump(self.to_dict(), f, ensure_ascii=False, indent=2)
+# ============================================================
+# 设置管理器 / Settings Manager (对齐 claude-code-claude)
+# ============================================================
 
+class SettingsManager:
+    """
+    多源设置管理器 / Multi-source settings manager
 
-class ConfigManager:
-    """配置管理器，支持热加载"""
-    
-    def __init__(self, config_path: Optional[str] = None):
-        self._lock = Lock()
-        self._config: Optional[AgentConfig] = None
-        self._config_path: Optional[str] = config_path
-        self._watch_task: Optional[asyncio.Task] = None
-        self._change_callbacks: List[Callable[[AgentConfig], None]] = []
-        self._load_config()
-    
-    def _load_config(self):
-        """加载配置"""
-        with self._lock:
-            if self._config_path:
-                path = Path(self._config_path)
-                if path.exists():
-                    if path.suffix in ['.yaml', '.yml']:
-                        self._config = AgentConfig.from_yaml(str(path))
-                    elif path.suffix == '.json':
-                        self._config = AgentConfig.from_json(str(path))
-                    else:
-                        self._config = AgentConfig()
-                else:
-                    self._config = AgentConfig()
-            else:
-                self._config = AgentConfig()
-    
-    @property
-    def config(self) -> AgentConfig:
-        """获取当前配置"""
-        with self._lock:
-            return self._config
-    
-    def reload(self):
-        """重新加载配置"""
-        self._load_config()
-        self._notify_callbacks()
-    
-    def update(self, updates: Dict[str, Any]):
-        """更新配置"""
-        with self._lock:
-            current_dict = self._config.to_dict()
-            # 深度更新
-            self._deep_update(current_dict, updates)
-            self._config = AgentConfig.from_dict(current_dict)
-        self._notify_callbacks()
-    
-    def _deep_update(self, target: Dict[str, Any], source: Dict[str, Any]):
-        """深度更新字典"""
-        for k, v in source.items():
-            if isinstance(v, dict) and k in target and isinstance(target[k], dict):
-                self._deep_update(target[k], v)
-            else:
-                target[k] = v
-    
-    def add_change_callback(self, callback: Callable[[AgentConfig], None]):
-        """添加配置变化回调"""
-        self._change_callbacks.append(callback)
-    
-    def remove_change_callback(self, callback: Callable[[AgentConfig], None]):
-        """移除配置变化回调"""
-        if callback in self._change_callbacks:
-            self._change_callbacks.remove(callback)
-    
-    def _notify_callbacks(self):
-        """通知所有回调"""
-        config = self.config
-        for callback in self._change_callbacks:
+    对齐 claude-code-claude 的设置系统：
+    - 支持多源设置加载（框架/项目/用户/全局/环境变量/CLI）
+    - 按优先级合并设置
+    - 设置变更检测
+
+    Aligns with claude-code-claude's settings system:
+    - Multi-source settings loading (framework/project/user/global/env/cli)
+    - Priority-based settings merging
+    - Settings change detection
+    """
+
+    def __init__(self):
+        self._settings: dict[str, Any] = {}
+        self._source_values: dict[str, dict[str, Any]] = {}
+        self._change_listeners: list = []
+        self._load_all_sources()
+
+    def _load_all_sources(self) -> None:
+        """加载所有设置源 / Load all setting sources"""
+        for source_name in sorted(SETTING_SOURCES, key=lambda k: SETTING_SOURCES[k].priority):
+            source = SETTING_SOURCES[source_name]
+            source_settings = self._load_source(source)
+            if source_settings:
+                self._source_values[source_name] = source_settings
+                self._merge_settings(source_settings)
+
+    def _load_source(self, source: SettingSource) -> dict[str, Any]:
+        """
+        加载单个设置源 / Load single setting source
+        """
+        if source.name == "env":
+            return self._load_env_settings()
+        if source.name == "cli":
+            return {}
+
+        if source.path and source.path.exists():
             try:
-                callback(config)
+                if source.path.is_file():
+                    with open(source.path, "r", encoding="utf-8") as f:
+                        return yaml.safe_load(f) or {}
+                elif source.path.is_dir():
+                    merged = {}
+                    for yaml_file in source.path.glob("*.yaml"):
+                        with open(yaml_file, "r", encoding="utf-8") as f:
+                            data = yaml.safe_load(f) or {}
+                            merged[yaml_file.stem] = data
+                    return merged
             except Exception:
                 pass
-    
-    async def watch_changes(self):
-        """监视配置文件变化"""
-        if not self._config_path:
-            return
-        
-        path = Path(self._config_path)
-        if not path.exists():
-            return
-        
-        try:
-            async for changes in awatch(path):
-                self.reload()
-        except asyncio.CancelledError:
-            pass
-    
-    async def start_watching(self):
-        """开始监视配置文件"""
-        if self._config_path and not self._watch_task:
-            self._watch_task = asyncio.create_task(self.watch_changes())
-    
-    async def stop_watching(self):
-        """停止监视配置文件"""
-        if self._watch_task:
-            self._watch_task.cancel()
-            try:
-                await self._watch_task
-            except asyncio.CancelledError:
-                pass
-            self._watch_task = None
-
-
-# 全局配置管理器实例
-_global_config_manager: Optional[ConfigManager] = None
-
-
-def get_config_manager(config_path: Optional[str] = None) -> ConfigManager:
-    """获取全局配置管理器"""
-    global _global_config_manager
-    if _global_config_manager is None:
-        _global_config_manager = ConfigManager(config_path)
-    return _global_config_manager
-
-
-def get_config() -> AgentConfig:
-    """获取当前配置 / Get current configuration"""
-    return get_config_manager().config
-
-
-class PromptsConfig:
-    """
-    提示词配置 - Prompts Configuration
-    从YAML配置文件加载提示词模板
-    Loads prompt templates from YAML configuration file
-    """
-
-    _instance: Optional["PromptsConfig"] = None
-
-    def __new__(cls):
-        if cls._instance is None:
-            cls._instance = super().__new__(cls)
-            cls._instance._config = cls._load_prompts_config()
-        return cls._instance
-
-    @staticmethod
-    def _load_prompts_config() -> Dict[str, Any]:
-        """加载提示词配置文件 - Load prompts configuration file"""
-        config_path = Path(__file__).parent / "configs" / "framework_prompts.yaml"
-        if config_path.exists():
-            with open(config_path, "r", encoding="utf-8") as f:
-                return yaml.safe_load(f) or {}
         return {}
 
-    @property
-    def code_system_prompt(self) -> str:
-        return self._config.get("code_system_prompt", "")
+    def _load_env_settings(self) -> dict[str, Any]:
+        """从环境变量加载设置 / Load settings from env vars"""
+        env_settings = {}
+        prefix = "ALONEWORK_"
+        for key, value in os.environ.items():
+            if key.startswith(prefix):
+                setting_key = key[len(prefix):].lower().replace("_", ".")
+                env_settings[setting_key] = value
+        return env_settings
+
+    def _merge_settings(self, new_settings: dict[str, Any]) -> None:
+        """合并设置 / Merge settings"""
+        self._deep_merge(self._settings, new_settings)
+
+    def _deep_merge(self, base: dict, override: dict) -> dict:
+        """深度合并字典 / Deep merge dictionaries"""
+        for key, value in override.items():
+            if key in base and isinstance(base[key], dict) and isinstance(value, dict):
+                self._deep_merge(base[key], value)
+            else:
+                base[key] = value
+        return base
+
+    def get(self, key: str, default: Any = None) -> Any:
+        """
+        获取设置值 / Get setting value
+
+        支持点分隔的嵌套键 / Supports dot-separated nested keys
+        """
+        keys = key.split(".")
+        value = self._settings
+        for k in keys:
+            if isinstance(value, dict):
+                value = value.get(k)
+            else:
+                return default
+            if value is None:
+                return default
+        return value
+
+    def set(self, key: str, value: Any, source: str = "user") -> None:
+        """
+        设置值 / Set value
+
+        Args:
+            key: 设置键（支持点分隔）/ Setting key (dot-separated)
+            value: 设置值 / Setting value
+            source: 设置来源 / Setting source
+        """
+        keys = key.split(".")
+        target = self._settings
+        for k in keys[:-1]:
+            if k not in target or not isinstance(target[k], dict):
+                target[k] = {}
+            target = target[k]
+        old_value = target.get(keys[-1])
+        target[keys[-1]] = value
+
+        if source not in self._source_values:
+            self._source_values[source] = {}
+
+        if old_value != value:
+            self._notify_change(key, old_value, value)
+
+    def _notify_change(self, key: str, old_value: Any, new_value: Any) -> None:
+        """通知设置变更 / Notify settings change"""
+        for listener in self._change_listeners:
+            try:
+                listener(key, old_value, new_value)
+            except Exception:
+                pass
+
+    def add_change_listener(self, listener) -> None:
+        """添加变更监听器 / Add change listener"""
+        self._change_listeners.append(listener)
+
+    def remove_change_listener(self, listener) -> None:
+        """移除变更监听器 / Remove change listener"""
+        if listener in self._change_listeners:
+            self._change_listeners.remove(listener)
+
+    def reload(self) -> None:
+        """重新加载所有设置 / Reload all settings"""
+        self._settings.clear()
+        self._source_values.clear()
+        self._load_all_sources()
+
+    def get_all(self) -> dict[str, Any]:
+        """获取所有设置 / Get all settings"""
+        return self._settings.copy()
+
+    def get_source_value(self, source: str, key: str, default: Any = None) -> Any:
+        """获取指定来源的设置值 / Get setting value from specific source"""
+        source_settings = self._source_values.get(source, {})
+        keys = key.split(".")
+        value = source_settings
+        for k in keys:
+            if isinstance(value, dict):
+                value = value.get(k)
+            else:
+                return default
+            if value is None:
+                return default
+        return value
+
+
+# ============================================================
+# 应用状态 / Application State (对齐 claude-code-claude 的 AppState)
+# ============================================================
+
+class AppState:
+    """
+    应用状态管理 / Application state management
+
+    对齐 claude-code-claude 的 AppState：
+    - 集中式状态存储
+    - 状态变更通知
+    - 选择器支持
+
+    Aligns with claude-code-claude's AppState:
+    - Centralized state storage
+    - State change notification
+    - Selector support
+    """
+
+    def __init__(self, settings_manager: Optional[SettingsManager] = None):
+        self._state: dict[str, Any] = {
+            "verbose": False,
+            "model_name": "deepseek-v4-flash",
+            "output_format": "text",
+            "theme": "dark",
+            "agent_color": "cyan",
+            "effort_level": "auto",
+            "fast_mode": {"enabled": False},
+            "output_style": "default",
+            "interaction_mode": "agent",
+            "no_stream": False,
+            "show_thinking": False,
+            "no_ime": False,
+            "auto_compact": False,
+            "compact_threshold": 100,
+            "context_files": [],
+            "tool_permission_context": ToolPermissionContext(),
+        }
+        self._settings_manager = settings_manager or SettingsManager()
+        self._listeners: list = []
+        self._load_from_settings()
+
+    def _load_from_settings(self) -> None:
+        """从设置加载状态 / Load state from settings"""
+        theme = self._settings_manager.get("theme.default", "dark")
+        if theme:
+            self._state["theme"] = theme
+
+        effort = self._settings_manager.get("effort.default", "auto")
+        if effort:
+            self._state["effort_level"] = effort
+
+    def get(self, key: str, default: Any = None) -> Any:
+        """获取状态值 / Get state value"""
+        return self._state.get(key, default)
+
+    def set(self, key: str, value: Any) -> None:
+        """设置状态值 / Set state value"""
+        old_value = self._state.get(key)
+        self._state[key] = value
+        if old_value != value:
+            self._notify(key, old_value, value)
+
+    def _notify(self, key: str, old_value: Any, new_value: Any) -> None:
+        """通知状态变更 / Notify state change"""
+        for listener in self._listeners:
+            try:
+                listener(key, old_value, new_value)
+            except Exception:
+                pass
+
+    def add_listener(self, listener) -> None:
+        """添加监听器 / Add listener"""
+        self._listeners.append(listener)
+
+    def remove_listener(self, listener) -> None:
+        """移除监听器 / Remove listener"""
+        if listener in self._listeners:
+            self._listeners.remove(listener)
+
+    def get_all(self) -> dict[str, Any]:
+        """获取所有状态 / Get all state"""
+        return self._state.copy()
+
+    def update(self, updates: dict[str, Any]) -> None:
+        """批量更新状态 / Batch update state"""
+        for key, value in updates.items():
+            self.set(key, value)
 
     @property
-    def code_generation_template(self) -> str:
-        return self._config.get("code_generation_template", "")
+    def settings(self) -> SettingsManager:
+        """获取设置管理器 / Get settings manager"""
+        return self._settings_manager
 
     @property
-    def debug_template(self) -> str:
-        return self._config.get("debug_template", "")
-
-    @property
-    def refactor_template(self) -> str:
-        return self._config.get("refactor_template", "")
-
-    @property
-    def search_agent_prompt(self) -> str:
-        return self._config.get("search_agent_prompt", "")
-
-    @property
-    def plan_mode_prompt(self) -> str:
-        return self._config.get("plan_mode_prompt", "")
-
-    @property
-    def mtc_system_prompt(self) -> str:
-        return self._config.get("mtc_system_prompt", "")
-
-    @property
-    def intent_clarification_template(self) -> str:
-        return self._config.get("intent_clarification_template", "")
-
-    @property
-    def task_planning_template(self) -> str:
-        return self._config.get("task_planning_template", "")
-
-    @property
-    def output_format_guide(self) -> str:
-        return self._config.get("output_format_guide", "")
-
-    @property
-    def mtc_skills_prompt(self) -> str:
-        return self._config.get("mtc_skills_prompt", "")
-
-    @property
-    def task_decomposition_prompt(self) -> str:
-        return self._config.get("task_decomposition_prompt", "")
-
-    @property
-    def task_execution_prompt(self) -> str:
-        return self._config.get("task_execution_prompt", "")
-
-    def get_file_generation_prompt(self, file_type: str) -> str:
-        """获取文件生成提示词 - Get file generation prompt by type"""
-        file_gen = self._config.get("file_generation", {})
-        return file_gen.get(file_type, "")
-
-    @classmethod
-    def reload(cls) -> "PromptsConfig":
-        """重新加载配置 - Reload configuration"""
-        cls._instance = None
-        return cls()
+    def tool_permission_context(self) -> ToolPermissionContext:
+        """获取工具权限上下文 / Get tool permission context"""
+        return self._state.get("tool_permission_context", ToolPermissionContext())
 
 
-def get_prompts_config() -> PromptsConfig:
-    """获取提示词配置实例 - Get prompts configuration instance"""
-    return PromptsConfig()
+# ============================================================
+# 全局实例 / Global Instances
+# ============================================================
+
+_settings_manager: Optional[SettingsManager] = None
+_app_state: Optional[AppState] = None
+
+
+def get_settings_manager() -> SettingsManager:
+    """获取全局设置管理器 / Get global settings manager"""
+    global _settings_manager
+    if _settings_manager is None:
+        _settings_manager = SettingsManager()
+    return _settings_manager
+
+
+def get_app_state() -> AppState:
+    """获取全局应用状态 / Get global application state"""
+    global _app_state
+    if _app_state is None:
+        _app_state = AppState(get_settings_manager())
+    return _app_state
+
+
+def reset_state() -> None:
+    """重置全局状态 / Reset global state"""
+    global _settings_manager, _app_state
+    _settings_manager = None
+    _app_state = None
+
+
+def ensure_directories() -> None:
+    """确保所有必要目录存在 / Ensure all necessary directories exist"""
+    for dir_path in [
+        ALONECHAT_DIR,
+        SESSIONS_DIR,
+        MEMORY_DIR,
+        SKILLS_DIR,
+        COMMANDS_DIR,
+        HOOKS_DIR,
+        SHARED_DIR,
+        FEEDBACK_DIR,
+        TAGS_DIR,
+    ]:
+        dir_path.mkdir(parents=True, exist_ok=True)

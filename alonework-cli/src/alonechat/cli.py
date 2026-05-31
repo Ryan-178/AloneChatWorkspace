@@ -1,4 +1,4 @@
-"""
+﻿"""
 AloneWork CLI主入口 / AloneWork CLI Main Entry
 
 提供命令行接口，支持 / Provides CLI interface for:
@@ -8,19 +8,13 @@ AloneWork CLI主入口 / AloneWork CLI Main Entry
 - test: 自动测试 / Auto testing
 - commit: 智能提交 / Smart commit
 
-新增功能 / New Features:
-- -p/--print: 打印模式 / Print mode
-- --continue: 继续会话 / Continue session
-- -r/--resume: 恢复会话 / Resume session
-- --output-format: 输出格式 / Output format
-- --name: 设置会话显示名称 / Set session display name (v2.1.76)
-- --agent: 覆盖代理设置 / Override agent settings (v2.0.59)
-- --auto-compact: 自动压缩对话 / Auto compact conversation (v0.2.47)
-- --worktree: 在隔离的 Git 工作树中启动 / Start in isolated Git worktree (v2.1.49)
-- --add-dir: 附加目录（加载技能/插件/CLAUDE.md）/ Additional directories (v2.1.45)
-- --no-stream: 禁用流式输出 / Disable streaming output (v2.1.78)
-- --show-thinking: 启用Ctrl+O思维块 / Enable Ctrl+O thinking block (v2.1.0)
-- --no-ime: 禁用IME支持 / Disable IME support (v2.0.68)
+架构对齐 claude-code-claude / Architecture aligned with claude-code-claude:
+- 集中式状态管理 / Centralized state management (AppState)
+- 多源设置系统 / Multi-source settings system (SettingsManager)
+- 命令类型系统 / Command type system (CommandType)
+- 工具权限上下文 / Tool permission context (ToolPermissionContext)
+
+版本 / Version: 2.1.80
 """
 
 import sys
@@ -36,6 +30,17 @@ from alonechat import __version__
 from alonechat.commands import init, chat, generate, test, commit, data, workflow, env
 from alonechat.config import ConfigManager
 from alonechat.session import SessionManager
+
+# 框架架构层 / Framework architecture layer
+from alonechat.framework_config import (
+    AppState,
+    SettingsManager,
+    get_app_state,
+    get_settings_manager,
+    ensure_directories,
+    CommandType,
+    ToolPermissionContext,
+)
 
 console = Console()
 
@@ -138,7 +143,7 @@ def setup_cli_enhancements(
         CLI 增强管理器实例 / CLI enhancements manager instance, or None
     """
     try:
-        from agent_framework.cli_enhancements import CliEnhancementsManager
+        from alonechat.cli_enhancements import CliEnhancementsManager
 
         manager = CliEnhancementsManager()
 
@@ -279,6 +284,29 @@ def main(
 
     parsed_agent_config = parse_agent_config(agent_config) if agent_config else {}
 
+    ensure_directories()
+
+    app_state = get_app_state()
+    settings_manager = get_settings_manager()
+
+    if verbose:
+        app_state.set("verbose", True)
+    if model_name:
+        app_state.set("model_name", model_name)
+    if output_format:
+        app_state.set("output_format", output_format)
+    if no_stream:
+        app_state.set("no_stream", True)
+    if show_thinking:
+        app_state.set("show_thinking", True)
+    if no_ime:
+        app_state.set("no_ime", True)
+    if auto_compact:
+        app_state.set("auto_compact", True)
+        app_state.set("compact_threshold", compact_threshold)
+
+    ctx.obj["app_state"] = app_state
+    ctx.obj["settings_manager"] = settings_manager
     ctx.obj["verbose"] = verbose
     ctx.obj["config_manager"] = ConfigManager(config_path=config)
     ctx.obj["session_manager"] = SessionManager()

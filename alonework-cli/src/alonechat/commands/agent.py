@@ -20,8 +20,8 @@ console = Console()
 def get_llm():
     """获取LLM实例"""
     try:
-        from agent_framework.llm import LiteLLMProvider
-        from agent_framework.config import config
+        from alonechat.llm import LiteLLMProvider
+        from alonechat.config import config
         
         llm_config = config.llm
         return LiteLLMProvider(
@@ -31,13 +31,13 @@ def get_llm():
         )
     except Exception as e:
         console.print(f"[red]无法初始化LLM: {e}[/red]")
-        console.print("[dim]请确保配置正确且agent-framework已安装[/dim]")
+        console.print("[dim]请确保配置正确且alonechat已安装[/dim]")
         raise
 
 
 @click.group()
 def agent_commands():
-    """Agent相关命令 - 调用agent-framework功能"""
+    """Agent相关命令 - 调用alonechat功能"""
     pass
 
 
@@ -65,7 +65,7 @@ def task_command(obj: dict, description: str, execute: bool, workspace: str):
     ))
     
     try:
-        from agent_framework.services.task_planner import TaskPlanner
+        from alonechat.services.task_planner import TaskPlanner
         
         llm = get_llm()
         planner = TaskPlanner(llm=llm)
@@ -122,8 +122,8 @@ def task_command(obj: dict, description: str, execute: bool, workspace: str):
             console.print(result)
         
     except ImportError:
-        console.print("[red]错误: agent-framework未安装[/red]")
-        console.print("[dim]请确保agent-framework在Python路径中[/dim]")
+        console.print("[red]错误: alonechat未安装[/red]")
+        console.print("[dim]请确保alonechat在Python路径中[/dim]")
     except Exception as e:
         console.print(f"[red]错误: {e}[/red]")
 
@@ -152,7 +152,7 @@ def process_command(obj: dict, file_path: str, output: str | None, save: str | N
     console.print(f"文件大小: [cyan]{file_path.stat().st_size / 1024:.2f} KB[/cyan]")
     
     try:
-        from agent_framework.services.file_processors import get_processor
+        from alonechat.services.file_processors import get_processor
         
         processor = get_processor(suffix)
         
@@ -189,7 +189,7 @@ def process_command(obj: dict, file_path: str, output: str | None, save: str | N
                 console.print(text)
         
     except ImportError:
-        console.print("[red]错误: agent-framework未安装[/red]")
+        console.print("[red]错误: alonechat未安装[/red]")
     except Exception as e:
         console.print(f"[red]错误: {e}[/red]")
 
@@ -219,7 +219,7 @@ def fix_command(obj: dict, error: str | None, file_path: str | None, run_tests: 
         console.print(f"错误: [red]{error}[/red]")
     
     try:
-        from agent_framework.services.error_fixer import ErrorFixer
+        from alonechat.services.error_fixer import ErrorFixer
         
         llm = get_llm()
         fixer = ErrorFixer(llm=llm)
@@ -260,7 +260,7 @@ def fix_command(obj: dict, error: str | None, file_path: str | None, run_tests: 
             console.print(f"[red]✗ 修复失败: {result.get('message', '未知错误')}[/red]")
         
     except ImportError:
-        console.print("[red]错误: agent-framework未安装[/red]")
+        console.print("[red]错误: alonechat未安装[/red]")
     except Exception as e:
         console.print(f"[red]错误: {e}[/red]")
 
@@ -275,7 +275,7 @@ def skill_command(obj: dict, skill_name: str | None, list_skills: bool, run_skil
     """
     Skills管理
     
-    使用agent-framework的SkillsRegistry管理技能
+    使用alonechat的SkillsRegistry管理技能
     
     示例：
     $ alonechat agent skill --list
@@ -283,7 +283,7 @@ def skill_command(obj: dict, skill_name: str | None, list_skills: bool, run_skil
     $ alonechat agent skill data_analysis --run --params '{"data": [...]}'
     """
     try:
-        from agent_framework.tools.skills_registry import SkillsRegistry
+        from alonechat.tools.skills_registry import SkillsRegistry
         
         registry = SkillsRegistry()
         
@@ -344,7 +344,7 @@ def skill_command(obj: dict, skill_name: str | None, list_skills: bool, run_skil
             console.print("[yellow]请指定技能名称或使用 --list 查看所有技能[/yellow]")
     
     except ImportError:
-        console.print("[red]错误: agent-framework未安装[/red]")
+        console.print("[red]错误: alonechat未安装[/red]")
     except Exception as e:
         console.print(f"[red]错误: {e}[/red]")
 
@@ -366,7 +366,7 @@ def rag_command(obj: dict, action: str, path_or_query: str, k: int):
     $ alonechat agent rag search "查询内容" --k 10
     """
     try:
-        from agent_framework.rag import RAGPipeline
+        from alonechat.rag import RAGPipeline
         
         pipeline = RAGPipeline()
         
@@ -429,7 +429,7 @@ def generate_command(obj: dict, type: str, request: str, output: str, data: str 
     """
     文件生成
     
-    使用agent-framework的FileGenerators生成各种文件
+    使用alonechat的FileGenerators生成各种文件
     
     示例：
     $ alonechat agent generate ppt --request "产品介绍PPT" --output product.pptx
@@ -441,7 +441,7 @@ def generate_command(obj: dict, type: str, request: str, output: str, data: str 
     console.print(f"输出: [cyan]{output}[/cyan]")
     
     try:
-        from agent_framework.services.file_generators import FileGeneratorService
+        from alonechat.services.file_generators import FileGeneratorService
         
         llm = get_llm()
         service = FileGeneratorService(llm=llm)
@@ -489,7 +489,7 @@ def analyze_command(obj: dict, file_path: str, output: str | None):
     """
     数据分析
     
-    使用agent-framework分析数据文件
+    使用alonechat分析数据文件
     
     示例：
     $ alonechat agent analyze data.xlsx
@@ -500,13 +500,13 @@ def analyze_command(obj: dict, file_path: str, output: str | None):
     console.print(f"\n[bold]分析文件: {file_path.name}[/bold]")
     
     try:
-        from agent_framework.services.file_generators import FileGeneratorService
+        from alonechat.services.file_generators import FileGeneratorService
         
         llm = get_llm()
         service = FileGeneratorService(llm=llm)
         
         # 先读取文件
-        from agent_framework.services.file_processors import get_processor
+        from alonechat.services.file_processors import get_processor
         processor = get_processor(file_path.suffix)
         data = asyncio.run(processor.to_text(file_path))
         

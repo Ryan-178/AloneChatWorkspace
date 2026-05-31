@@ -43,6 +43,28 @@ from alonechat.slash.commands.todos import todos_command
 from alonechat.slash.commands.export import export_command
 from alonechat.slash.commands.mode import handle_mode_command
 
+# v2.1.80 新增命令 / New commands
+from alonechat.slash.commands.copy import copy_command
+from alonechat.slash.commands.diff_cmd import diff_command
+from alonechat.slash.commands.effort import effort_command
+from alonechat.slash.commands.files_cmd import files_command
+from alonechat.slash.commands.hooks_cmd import hooks_command
+from alonechat.slash.commands.memory_cmd import memory_command
+from alonechat.slash.commands.rename_cmd import rename_command
+from alonechat.slash.commands.resume_cmd import resume_command
+from alonechat.slash.commands.session_cmd import session_command
+from alonechat.slash.commands.skills_cmd import skills_command
+from alonechat.slash.commands.tasks_cmd import tasks_command
+from alonechat.slash.commands.tag_cmd import tag_command
+from alonechat.slash.commands.theme_cmd import theme_command
+from alonechat.slash.commands.color_cmd import color_command
+from alonechat.slash.commands.feedback_cmd import feedback_command
+from alonechat.slash.commands.fast_cmd import fast_command
+from alonechat.slash.commands.output_style_cmd import output_style_command
+from alonechat.slash.commands.share_cmd import share_command
+from alonechat.slash.commands.stickers_cmd import stickers_command
+from alonechat.slash.commands.upgrade_cmd import upgrade_command
+
 __all__ = [
     "clear_command",
     "compact_command",
@@ -68,4 +90,25 @@ __all__ = [
     "todos_command",
     "export_command",
     "handle_mode_command",
+    # v2.1.80 新增 / New
+    "copy_command",
+    "diff_command",
+    "effort_command",
+    "files_command",
+    "hooks_command",
+    "memory_command",
+    "rename_command",
+    "resume_command",
+    "session_command",
+    "skills_command",
+    "tasks_command",
+    "tag_command",
+    "theme_command",
+    "color_command",
+    "feedback_command",
+    "fast_command",
+    "output_style_command",
+    "share_command",
+    "stickers_command",
+    "upgrade_command",
 ]

@@ -1,22 +1,27 @@
-"""
-代码模块 / Code Module
-
-提供 / Provides:
-- 代码生成 / Code generation
-- 代码分析 / Code analysis
-- 代码重构 / Code refactoring
-"""
-
-from alonechat.code.generator import (
-    CodeGenerator,
-    CodeAnalyzer,
-    GeneratedCode,
-    code_config,
-)
+from alonechat.code.codex_bridge import CodexBridge, CodexBridgeConfig, CodexExecResult, CodexEvent, CodexProvider
+from alonechat.code.codex_config import CodexConfigBuilder
+from alonechat.code.codex_parser import CodexStreamParser, CodexEventType, ParsedEvent
+from alonechat.code.code_engine import CodeExecutionEngine, ExecutionResult, SandboxPolicy
+from alonechat.code.apply_patch import ApplyPatchTool, PatchHunk, FileChange
+from alonechat.code.shell_tool import ShellTool, ShellType, ShellResult
 
 __all__ = [
-    "CodeGenerator",
-    "CodeAnalyzer",
-    "GeneratedCode",
-    "code_config",
+    "CodexBridge",
+    "CodexBridgeConfig",
+    "CodexExecResult",
+    "CodexEvent",
+    "CodexProvider",
+    "CodexConfigBuilder",
+    "CodexStreamParser",
+    "CodexEventType",
+    "ParsedEvent",
+    "CodeExecutionEngine",
+    "ExecutionResult",
+    "SandboxPolicy",
+    "ApplyPatchTool",
+    "PatchHunk",
+    "FileChange",
+    "ShellTool",
+    "ShellType",
+    "ShellResult",
 ]

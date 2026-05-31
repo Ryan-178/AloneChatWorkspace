@@ -1,4 +1,4 @@
-"""
+﻿"""
 /mcp 命令 - 管理MCP服务器 / Manage MCP servers
 
 支持 / Supports:
@@ -173,7 +173,7 @@ def mcp_slash_command(args: list, obj: dict, session_manager, registry, **kwargs
         return
 
     if subcommand == "project":
-        from agent_framework.deepseek_optimization.mcp_marketplace.config import discover_project_mcp_json
+        from alonechat.deepseek_optimization.mcp_marketplace.config import discover_project_mcp_json
         path = discover_project_mcp_json()
         if path:
             console.print(f"[green]✓ 发现项目作用域MCP配置 / Project-scoped MCP config: {path}[/green]")

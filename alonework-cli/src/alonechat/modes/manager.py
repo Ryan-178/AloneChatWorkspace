@@ -5,7 +5,7 @@ CLI模式管理器 - CLI Mode Manager
 Implements interaction mode management for CLI layer with Rich terminal approval interface
 
 功能 / Features:
-- 继承agent-framework的ModeManager基类
+- 继承alonechat的ModeManager基类
 - 使用Rich终端界面进行用户确认
 - 支持批量批准
 - 显示模式切换通知
@@ -17,8 +17,8 @@ from rich.prompt import Confirm
 from rich.panel import Panel
 from rich.text import Text
 
-from agent_framework.core.mode_manager import ModeManager
-from agent_framework.core.types import InteractionMode, ModeConfig
+from alonechat.core.mode_manager import ModeManager
+from alonechat.core.types import InteractionMode, ModeConfig
 
 
 console = Console()
